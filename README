@@ -1,0 +1,43 @@
+RTM-GLib
+========
+
+
+Description
+-----------
+
+*RTM-GLib* is a library which provides access to the API of Remember The Milk.
+
+Remember The Milk [1]_ is a task and time management web application.
+
+
+Requirements
+------------
+
+*RTM-GLib* depens on:
+
+* GLib (``glib-2.0``)
+* librest (``rest``) [2]_
+
+
+Installation
+------------
+
+See the ``INSTALL`` file.
+
+
+License
+-------
+
+*RTM-GLib* is released under the terms of the GNU Lesser General Public License
+version 2.1, or (at your option) any later version.
+
+Please read the ``COPYING`` file for details.
+
+
+Authors
+-------
+
+See the ``AUTHORS`` file.
+
+.. [1] http://www.rememberthemilk.com/
+.. [2] http://moblin.org/projects/librest
