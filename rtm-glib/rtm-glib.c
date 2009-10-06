@@ -949,15 +949,26 @@ rtm_glib_tasks_add (RtmGlib *rtm, gchar* timeline, gchar *task_name,
                 parse_smart_add = "1";
         }
 
-        root = rtm_glib_call_method (
-                rtm,
-                RTM_METHOD_TASKS_ADD, &tmp_error,
-                "auth_token", rtm->priv->auth_token,
-                "timeline", timeline,
-                "name", task_name,
-                "list_id", list_id,
-                "parse", parse_smart_add,
-                NULL);
+        if (list_id == NULL) {
+                root = rtm_glib_call_method (
+                        rtm,
+                        RTM_METHOD_TASKS_ADD, &tmp_error,
+                        "auth_token", rtm->priv->auth_token,
+                        "timeline", timeline,
+                        "name", task_name,
+                        "parse", parse_smart_add,
+                        NULL);
+        } else {
+                root = rtm_glib_call_method (
+                        rtm,
+                        RTM_METHOD_TASKS_ADD, &tmp_error,
+                        "auth_token", rtm->priv->auth_token,
+                        "timeline", timeline,
+                        "name", task_name,
+                        "list_id", list_id,
+                        "parse", parse_smart_add,
+                        NULL);
+        }
         if (tmp_error != NULL) {
                 g_propagate_error (error, tmp_error);
                 return NULL;
