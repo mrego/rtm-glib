@@ -781,9 +781,6 @@ rtm_glib_tasks_get_list (RtmGlib *rtm, gchar *list_id, gchar *filter,
         g_return_val_if_fail (rtm != NULL, NULL);
         g_return_val_if_fail (rtm->priv->auth_token != NULL, NULL);
 
-        if (list_id == NULL) {
-                list_id = "";
-        }
         if (filter == NULL) {
                 filter = "";
         }
@@ -799,14 +796,24 @@ rtm_glib_tasks_get_list (RtmGlib *rtm, gchar *list_id, gchar *filter,
 
         g_debug ("rtm_glib_tasks_get_list");
 
-        root = rtm_glib_call_method (
-                rtm,
-                RTM_METHOD_TASKS_GET_LIST, &tmp_error,
-                "auth_token", rtm->priv->auth_token,
-                "list_id", list_id,
-                "filter", filter,
-                "last_sync", last_sync,
-                NULL);
+        if (list_id == NULL) {
+                root = rtm_glib_call_method (
+                        rtm,
+                        RTM_METHOD_TASKS_GET_LIST, &tmp_error,
+                        "auth_token", rtm->priv->auth_token,
+                        "filter", filter,
+                        "last_sync", last_sync,
+                        NULL);
+        } else {
+                root = rtm_glib_call_method (
+                        rtm,
+                        RTM_METHOD_TASKS_GET_LIST, &tmp_error,
+                        "auth_token", rtm->priv->auth_token,
+                        "list_id", list_id,
+                        "filter", filter,
+                        "last_sync", last_sync,
+                        NULL);
+        }
         if (tmp_error != NULL) {
                 g_propagate_error (error, tmp_error);
                 return NULL;
