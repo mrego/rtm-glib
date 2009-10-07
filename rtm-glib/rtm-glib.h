@@ -118,4 +118,8 @@ gchar *
 rtm_glib_lists_set_name (RtmGlib *rtm, gchar* timeline, RtmList *list,
                          gchar *name, GError **error);
 
+gchar *
+rtm_glib_lists_set_default (RtmGlib *rtm, gchar* timeline, RtmList *list,
+                            GError **error);
+
 #endif /* __RTM_GLIB_H__ */

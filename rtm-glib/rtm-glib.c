@@ -121,6 +121,11 @@
 /* @param (required): name=%s, The desired list name. Cannot be Inbox or Sent */
 #define RTM_METHOD_LISTS_SET_NAME "rtm.lists.setName"
 
+/* @param (required): api_key=%s, Your API application key */
+/* @param (required): timeline=%s, The timeline within which to run a method */
+/* @param (required): list_id=%s, The id of the list to perform an action on */
+#define RTM_METHOD_LISTS_SET_DEFAULT_LIST "rtm.lists.setDefaultList"
+
 
 #define RTM_GLIB_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE (        \
                                            (obj), RTM_TYPE_GLIB, RtmGlibPrivate))
@@ -1275,4 +1280,46 @@ rtm_glib_lists_set_name (RtmGlib *rtm, gchar* timeline, RtmList *list,
         rest_xml_node_unref (root);
 
         return transaction_id;
+}
+
+/**
+ * rtm_glib_lists_set_default:
+ * @rtm: a #RtmGlib object already authenticated.
+ * @timeline: the timeline within which to run a method.
+ * @list: the #RtmList to set as default list.
+ * @error: location to store #GError or %NULL.
+ *
+ * Sets the default list.
+ *
+ * Returns: %TRUE if the opration is successfuly.
+ **/
+gchar *
+rtm_glib_lists_set_default (RtmGlib *rtm, gchar* timeline, RtmList *list,
+                            GError **error)
+{
+        g_return_val_if_fail (rtm != NULL, FALSE);
+        g_return_val_if_fail (rtm->priv->auth_token != NULL, FALSE);
+        g_return_val_if_fail (timeline != NULL, FALSE);
+        g_return_val_if_fail (list != NULL, FALSE);
+
+        RestXmlNode *root, *node;
+        GError *tmp_error = NULL;
+
+        g_debug ("rtm_glib_lists_set_default");
+
+        root = rtm_glib_call_method (
+                rtm,
+                RTM_METHOD_LISTS_SET_DEFAULT_LIST, &tmp_error,
+                "auth_token", rtm->priv->auth_token,
+                "timeline", timeline,
+                "list_id", rtm_list_get_id (list),
+                NULL);
+        if (tmp_error != NULL) {
+                g_propagate_error (error, tmp_error);
+                return FALSE;
+        }
+
+        rest_xml_node_unref (root);
+
+        return TRUE;
 }

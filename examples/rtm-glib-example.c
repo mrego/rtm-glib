@@ -199,6 +199,15 @@ main (gint argc, gchar **argv)
                 g_print ("List NOT renamed!\n");
         }
 
+        if (rtm_glib_lists_set_default (rtm, timeline, rtm_list, &error)) {
+                g_print ("List \"%s\" set as default!\n", rtm_list_get_id (rtm_list));
+        } else {
+                g_print ("List \"%s\" NOT set as default!\n", rtm_list_get_id (rtm_list));
+        }
+        if (error != NULL) {
+                g_error ("%s", rtm_error_get_message (error));
+        }
+
         transaction_id = rtm_glib_lists_delete (rtm, timeline, rtm_list, &error);
         if (error != NULL) {
                 g_error ("%s", rtm_error_get_message (error));
