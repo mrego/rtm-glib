@@ -1293,7 +1293,7 @@ rtm_glib_lists_set_name (RtmGlib *rtm, gchar* timeline, RtmList *list,
  *
  * Returns: %TRUE if the opration is successfuly.
  **/
-gchar *
+gboolean
 rtm_glib_lists_set_default (RtmGlib *rtm, gchar* timeline, RtmList *list,
                             GError **error)
 {
@@ -1302,7 +1302,7 @@ rtm_glib_lists_set_default (RtmGlib *rtm, gchar* timeline, RtmList *list,
         g_return_val_if_fail (timeline != NULL, FALSE);
         g_return_val_if_fail (list != NULL, FALSE);
 
-        RestXmlNode *root, *node;
+        RestXmlNode *root;
         GError *tmp_error = NULL;
 
         g_debug ("rtm_glib_lists_set_default");
