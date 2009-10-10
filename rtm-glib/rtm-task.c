@@ -37,6 +37,7 @@ struct _RtmTaskPrivate {
         gchar *list_id;
         gchar *name;
         gchar *priority;
+        gchar *url;
 };
 
 enum {
@@ -47,6 +48,7 @@ enum {
         PROP_LIST_ID,
         PROP_NAME,
         PROP_PRIORITY,
+        PROP_URL,
 };
 
 G_DEFINE_TYPE (RtmTask, rtm_task, G_TYPE_OBJECT);
@@ -76,6 +78,10 @@ rtm_task_get_property (GObject *gobject, guint prop_id, GValue *value,
 
         case PROP_PRIORITY:
                 g_value_set_string (value, priv->priority);
+                break;
+
+        case PROP_URL:
+                g_value_set_string (value, priv->url);
                 break;
 
         default:
@@ -117,6 +123,11 @@ rtm_task_set_property (GObject *gobject, guint prop_id, const GValue *value,
                 priv->priority = g_value_dup_string (value);
                 break;
 
+        case PROP_URL:
+                g_free (priv->url);
+                priv->url = g_value_dup_string (value);
+                break;
+
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (gobject, prop_id,
                                                    pspec);
@@ -134,6 +145,7 @@ rtm_task_finalize (GObject *gobject)
         g_free (priv->list_id);
         g_free (priv->name);
         g_free (priv->priority);
+        g_free (priv->url);
 
         G_OBJECT_CLASS (rtm_task_parent_class)->finalize (gobject);
 }
@@ -198,6 +210,16 @@ rtm_task_class_init (RtmTaskClass *klass)
                         "priority",
                         "Priority",
                         "The priority of the task",
+                        NULL,
+                        G_PARAM_READWRITE));
+
+        g_object_class_install_property (
+                gobject_class,
+                PROP_URL,
+                g_param_spec_string (
+                        "url",
+                        "URL",
+                        "The URL associated with a task",
                         NULL,
                         G_PARAM_READWRITE));
 
@@ -422,6 +444,7 @@ rtm_task_load_data (RtmTask *task, RestXmlNode *node, const gchar *list_id)
 
         task->priv->taskseries_id = g_strdup (rest_xml_node_get_attr (node, "id"));
         task->priv->name = g_strdup (rest_xml_node_get_attr (node, "name"));
+        task->priv->url = g_strdup (rest_xml_node_get_attr (node, "url"));
 
         node_tmp = rest_xml_node_find (node, "task");
         task->priv->id = g_strdup (rest_xml_node_get_attr (node_tmp, "id"));
@@ -452,7 +475,43 @@ rtm_task_to_string (RtmTask *task)
                 rtm_util_string_or_null (task->priv->list_id), "\n",
                 "  Name: ", rtm_util_string_or_null (task->priv->name), "\n",
                 "  Priority: ", rtm_util_string_or_null (task->priv->priority), "\n",
+                "  URL: ", rtm_util_string_or_null (task->priv->url), "\n",
                 "]\n",
                 NULL);
         return string;
+}
+
+/**
+ * rtm_task_get_url:
+ * @task: a #RtmTask.
+ *
+ * Gets the #RtmTask:url property of the object.
+ *
+ * Returns: the url of the task.
+ */
+gchar *
+rtm_task_get_url (RtmTask *task)
+{
+        g_return_val_if_fail (task != NULL, NULL);
+
+        return task->priv->url;
+}
+
+/**
+ * rtm_task_set_url:
+ * @task: a #RtmTask.
+ * @url: a url for the #RtmTask.
+ *
+ * Sets the #RtmTask:url property of the object.
+ *
+ * Returns: %TRUE if url is set.
+ */
+gboolean
+rtm_task_set_url (RtmTask *task, gchar* url)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+        g_return_val_if_fail (url != NULL, FALSE);
+
+        task->priv->url = g_strdup (url);
+        return TRUE;
 }

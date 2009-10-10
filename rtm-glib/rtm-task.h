@@ -95,4 +95,10 @@ rtm_task_load_data (RtmTask *task, RestXmlNode *node, const gchar *list_id);
 gchar *
 rtm_task_to_string (RtmTask *task);
 
+gchar *
+rtm_task_get_url (RtmTask *task);
+
+gboolean
+rtm_task_set_url (RtmTask *task, gchar* url);
+
 #endif /* __RTM_TASK_H__ */
