@@ -93,6 +93,16 @@
 #define RTM_METHOD_LISTS_SET_DEFAULT_LIST "rtm.lists.setDefaultList"
 
 /* @param (required): api_key=%s, Your API application key */
+/* @param (required): timeline=%s, The timeline within which to run a method */
+/* @param (required): list_id=%s, The id of the list to perform an action on */
+#define RTM_METHOD_LISTS_ARCHIVE "rtm.lists.archive"
+
+/* @param (required): api_key=%s, Your API application key */
+/* @param (required): timeline=%s, The timeline within which to run a method */
+/* @param (required): list_id=%s, The id of the list to perform an action on */
+#define RTM_METHOD_LISTS_UNARCHIVE "rtm.lists.unarchive"
+
+/* @param (required): api_key=%s, Your API application key */
 /* @param (optional): list_id=%s, The id of the list to perform an action on */
 /* @param (optional): filter=%s, If specified, only tasks matching the desired
    criteria are returned */
@@ -1322,4 +1332,98 @@ rtm_glib_lists_set_default (RtmGlib *rtm, gchar* timeline, RtmList *list,
         rest_xml_node_unref (root);
 
         return TRUE;
+}
+
+/**
+ * rtm_glib_lists_archive:
+ * @rtm: a #RtmGlib object already authenticated.
+ * @timeline: the timeline within which to run a method.
+ * @list: the #RtmList to be archived.
+ * @error: location to store #GError or %NULL.
+ *
+ * Archives a list.
+ *
+ * Returns: The transaction identifier or %NULL if it fails.
+ **/
+gchar *
+rtm_glib_lists_archive (RtmGlib *rtm, gchar* timeline, RtmList *list,
+                        GError **error)
+{
+        g_return_val_if_fail (rtm != NULL, NULL);
+        g_return_val_if_fail (rtm->priv->auth_token != NULL, NULL);
+        g_return_val_if_fail (timeline != NULL, NULL);
+        g_return_val_if_fail (list != NULL, NULL);
+
+        RestXmlNode *root, *node;
+        gchar *transaction_id;
+        GError *tmp_error = NULL;
+
+        g_debug ("rtm_glib_lists_archive");
+
+        root = rtm_glib_call_method (
+                rtm,
+                RTM_METHOD_LISTS_ARCHIVE, &tmp_error,
+                "auth_token", rtm->priv->auth_token,
+                "timeline", timeline,
+                "list_id", rtm_list_get_id (list),
+                NULL);
+        if (tmp_error != NULL) {
+                g_propagate_error (error, tmp_error);
+                return NULL;
+        }
+
+        node = rest_xml_node_find (root, "transaction");
+        transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
+        g_debug ("transaction_id: %s", transaction_id);
+
+        rest_xml_node_unref (root);
+
+        return transaction_id;
+}
+
+/**
+ * rtm_glib_lists_unarchive:
+ * @rtm: a #RtmGlib object already authenticated.
+ * @timeline: the timeline within which to run a method.
+ * @list: the #RtmList to be unarchived.
+ * @error: location to store #GError or %NULL.
+ *
+ * Unarchives a list.
+ *
+ * Returns: The transaction identifier or %NULL if it fails.
+ **/
+gchar *
+rtm_glib_lists_unarchive (RtmGlib *rtm, gchar* timeline, RtmList *list,
+                          GError **error)
+{
+        g_return_val_if_fail (rtm != NULL, NULL);
+        g_return_val_if_fail (rtm->priv->auth_token != NULL, NULL);
+        g_return_val_if_fail (timeline != NULL, NULL);
+        g_return_val_if_fail (list != NULL, NULL);
+
+        RestXmlNode *root, *node;
+        gchar *transaction_id;
+        GError *tmp_error = NULL;
+
+        g_debug ("rtm_glib_lists_unarchive");
+
+        root = rtm_glib_call_method (
+                rtm,
+                RTM_METHOD_LISTS_UNARCHIVE, &tmp_error,
+                "auth_token", rtm->priv->auth_token,
+                "timeline", timeline,
+                "list_id", rtm_list_get_id (list),
+                NULL);
+        if (tmp_error != NULL) {
+                g_propagate_error (error, tmp_error);
+                return NULL;
+        }
+
+        node = rest_xml_node_find (root, "transaction");
+        transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
+        g_debug ("transaction_id: %s", transaction_id);
+
+        rest_xml_node_unref (root);
+
+        return transaction_id;
 }

@@ -122,4 +122,12 @@ gboolean
 rtm_glib_lists_set_default (RtmGlib *rtm, gchar* timeline, RtmList *list,
                             GError **error);
 
+gchar *
+rtm_glib_lists_archive (RtmGlib *rtm, gchar* timeline, RtmList *list,
+                        GError **error);
+
+gchar *
+rtm_glib_lists_unarchive (RtmGlib *rtm, gchar* timeline, RtmList *list,
+                          GError **error);
+
 #endif /* __RTM_GLIB_H__ */

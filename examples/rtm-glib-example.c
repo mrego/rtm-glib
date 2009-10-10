@@ -199,6 +199,26 @@ main (gint argc, gchar **argv)
                 g_print ("List NOT renamed!\n");
         }
 
+        transaction_id = rtm_glib_lists_archive (rtm, timeline, rtm_list, &error);
+        if (error != NULL) {
+                g_error ("%s", rtm_error_get_message (error));
+        }
+        if (transaction_id != NULL) {
+                g_print ("List archived! transaction_id: %s\n", transaction_id);
+        } else {
+                g_print ("List NOT archived!\n");
+        }
+
+        transaction_id = rtm_glib_lists_unarchive (rtm, timeline, rtm_list, &error);
+        if (error != NULL) {
+                g_error ("%s", rtm_error_get_message (error));
+        }
+        if (transaction_id != NULL) {
+                g_print ("List unarchived! transaction_id: %s\n", transaction_id);
+        } else {
+                g_print ("List NOT unarchived!\n");
+        }
+
         if (rtm_glib_lists_set_default (rtm, timeline, rtm_list, &error)) {
                 g_print ("List \"%s\" set as default!\n", rtm_list_get_id (rtm_list));
         } else {
