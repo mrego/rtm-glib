@@ -58,27 +58,7 @@
 #define RTM_METHOD_AUTH_CHECK_TOKEN "rtm.auth.checkToken"
 
 /* @param (required): api_key=%s, Your API application key */
-/* @param (optional): list_id=%s, The id of the list to perform an action on */
-/* @param (optional): filter=%s, If specified, only tasks matching the desired
-   criteria are returned */
-/* @param (optional): last_sync=%s, An ISO 8601 formatted time value. If
-   last_sync is provided, only tasks modified since last_sync will be returned,
-   and each element will have an attribute, current, equal to last_sync */
-#define RTM_METHOD_TASKS_GET_LIST "rtm.tasks.getList"
-
-/* @param (required): api_key=%s, Your API application key */
-#define RTM_METHOD_LISTS_GET_LIST "rtm.lists.getList"
-
-/* @param (required): api_key=%s, Your API application key */
 #define RTM_METHOD_TIMELINES_CREATE "rtm.timelines.create"
-
-/* @param (required): api_key=%s, Your API application key */
-/* @param (required): timeline=%s, The timeline within which to run a method */
-/* @param (optional): list_id=%s, The id of the list to perform an action on */
-/* @param (required): name=%s, The desired task name */
-/* @param (optional): parse=%s, Specifies whether to process name using Smart
-   Add */
-#define RTM_METHOD_TASKS_ADD "rtm.tasks.add"
 
 /* @param (required): api_key=%s, Your API application key */
 /* @param (required): timeline=%s, The timeline within which to run a method */
@@ -87,21 +67,7 @@
 #define RTM_METHOD_TRANSACTIONS_UNDO "rtm.transactions.undo"
 
 /* @param (required): api_key=%s, Your API application key */
-/* @param (required): timeline=%s, The timeline within which to run a method */
-/* @param (required): list_id=%s, The id of the list to perform an action on */
-/* @param (required): taskseries_id=%s, The id of the task series to perform an
-   action on */
-/* @param (required): task_id=%s, The id of the task to perform an action on */
-#define RTM_METHOD_TASKS_DELETE "rtm.tasks.delete"
-
-/* @param (required): api_key=%s, Your API application key */
-/* @param (required): timeline=%s, The timeline within which to run a method */
-/* @param (required): list_id=%s, The id of the list to perform an action on */
-/* @param (required): taskseries_id=%s, The id of the task series to perform an
-   action on */
-/* @param (required): task_id=%s, The id of the task to perform an action on */
-/* @param (required): name=%s, The desired task name */
-#define RTM_METHOD_TASKS_SET_NAME "rtm.tasks.setName"
+#define RTM_METHOD_LISTS_GET_LIST "rtm.lists.getList"
 
 /* @param (required): api_key=%s, Your API application key */
 /* @param (required): timeline=%s, The timeline within which to run a method */
@@ -125,6 +91,40 @@
 /* @param (required): timeline=%s, The timeline within which to run a method */
 /* @param (required): list_id=%s, The id of the list to perform an action on */
 #define RTM_METHOD_LISTS_SET_DEFAULT_LIST "rtm.lists.setDefaultList"
+
+/* @param (required): api_key=%s, Your API application key */
+/* @param (optional): list_id=%s, The id of the list to perform an action on */
+/* @param (optional): filter=%s, If specified, only tasks matching the desired
+   criteria are returned */
+/* @param (optional): last_sync=%s, An ISO 8601 formatted time value. If
+   last_sync is provided, only tasks modified since last_sync will be returned,
+   and each element will have an attribute, current, equal to last_sync */
+#define RTM_METHOD_TASKS_GET_LIST "rtm.tasks.getList"
+
+/* @param (required): api_key=%s, Your API application key */
+/* @param (required): timeline=%s, The timeline within which to run a method */
+/* @param (optional): list_id=%s, The id of the list to perform an action on */
+/* @param (required): name=%s, The desired task name */
+/* @param (optional): parse=%s, Specifies whether to process name using Smart
+   Add */
+#define RTM_METHOD_TASKS_ADD "rtm.tasks.add"
+
+/* @param (required): api_key=%s, Your API application key */
+/* @param (required): timeline=%s, The timeline within which to run a method */
+/* @param (required): list_id=%s, The id of the list to perform an action on */
+/* @param (required): taskseries_id=%s, The id of the task series to perform an
+   action on */
+/* @param (required): task_id=%s, The id of the task to perform an action on */
+#define RTM_METHOD_TASKS_DELETE "rtm.tasks.delete"
+
+/* @param (required): api_key=%s, Your API application key */
+/* @param (required): timeline=%s, The timeline within which to run a method */
+/* @param (required): list_id=%s, The id of the list to perform an action on */
+/* @param (required): taskseries_id=%s, The id of the task series to perform an
+   action on */
+/* @param (required): task_id=%s, The id of the task to perform an action on */
+/* @param (required): name=%s, The desired task name */
+#define RTM_METHOD_TASKS_SET_NAME "rtm.tasks.setName"
 
 
 #define RTM_GLIB_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE (        \
