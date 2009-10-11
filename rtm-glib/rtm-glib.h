@@ -130,4 +130,8 @@ gchar *
 rtm_glib_lists_unarchive (RtmGlib *rtm, gchar* timeline, RtmList *list,
                           GError **error);
 
+gchar *
+rtm_glib_tasks_set_url (RtmGlib *rtm, gchar* timeline, RtmTask *task,
+                        gchar *url, GError **error);
+
 #endif /* __RTM_GLIB_H__ */
