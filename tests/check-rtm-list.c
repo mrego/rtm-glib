@@ -170,7 +170,6 @@ START_TEST (test_remove_task)
         fail_unless (g_list_length (rtm_list_get_tasks (list)) == 1,
                      "Task was not added properly");
 
-        g_print ("HERE");
         result = rtm_list_remove_task (list, "123456", &error);
         fail_unless (error == NULL, "Error must not be filled");
         fail_unless (result, "Method should return TRUE");
