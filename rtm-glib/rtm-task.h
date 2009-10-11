@@ -101,4 +101,16 @@ rtm_task_get_url (RtmTask *task);
 gboolean
 rtm_task_set_url (RtmTask *task, gchar* url);
 
+GList *
+rtm_task_get_tags (RtmTask *task);
+
+gchar *
+rtm_task_find_tag (RtmTask *task, gchar* tag);
+
+gboolean
+rtm_task_add_tag (RtmTask *task, gchar* tag, GError **error);
+
+gboolean
+rtm_task_remove_tag (RtmTask *task, gchar* tag, GError **error);
+
 #endif /* __RTM_TASK_H__ */

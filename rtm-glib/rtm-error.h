@@ -38,6 +38,8 @@ enum _RtmError
         RTM_ERROR_RESPONSE_FAIL,
         RTM_TASK_ALREADY_EXISTS,
         RTM_TASK_NOT_FOUND,
+        RTM_TAG_ALREADY_ASSIGNED,
+        RTM_TAG_NOT_FOUND,
 };
 
 typedef enum _RtmError RtmError;

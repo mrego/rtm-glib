@@ -27,6 +27,7 @@
 
 #include <rtm-task.h>
 #include <rtm-util.h>
+#include <rtm-error.h>
 
 #define RTM_TASK_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE (        \
                                            (obj), RTM_TYPE_TASK, RtmTaskPrivate))
@@ -38,6 +39,7 @@ struct _RtmTaskPrivate {
         gchar *name;
         gchar *priority;
         gchar *url;
+        GList *tags;
 };
 
 enum {
@@ -136,6 +138,16 @@ rtm_task_set_property (GObject *gobject, guint prop_id, const GValue *value,
 }
 
 static void
+rtm_task_dispose (GObject *gobject)
+{
+        RtmTaskPrivate *priv = RTM_TASK_GET_PRIVATE (RTM_TASK (gobject));
+
+        g_list_free (priv->tags);
+
+        G_OBJECT_CLASS (rtm_task_parent_class)->dispose (gobject);
+}
+
+static void
 rtm_task_finalize (GObject *gobject)
 {
         RtmTaskPrivate *priv = RTM_TASK_GET_PRIVATE (RTM_TASK (gobject));
@@ -160,6 +172,7 @@ rtm_task_class_init (RtmTaskClass *klass)
         gobject_class->get_property = rtm_task_get_property;
         gobject_class->set_property = rtm_task_set_property;
         gobject_class->finalize = rtm_task_finalize;
+        gobject_class->dispose = rtm_task_dispose;
 
         g_object_class_install_property (
                 gobject_class,
@@ -229,6 +242,7 @@ static void
 rtm_task_init (RtmTask *task)
 {
         task->priv = RTM_TASK_GET_PRIVATE (task);
+        task->priv->tags = NULL;
 }
 
 /**
@@ -440,11 +454,19 @@ rtm_task_load_data (RtmTask *task, RestXmlNode *node, const gchar *list_id)
         g_return_if_fail (node != NULL);
         g_return_if_fail (list_id != NULL);
 
-        RestXmlNode *node_tmp;
+        RestXmlNode *node_tags, *node_tmp;
+        gchar *tag;
 
         task->priv->taskseries_id = g_strdup (rest_xml_node_get_attr (node, "id"));
         task->priv->name = g_strdup (rest_xml_node_get_attr (node, "name"));
         task->priv->url = g_strdup (rest_xml_node_get_attr (node, "url"));
+
+        node_tags = rest_xml_node_find (node, "tags");
+        for (node_tmp = rest_xml_node_find (node_tags, "tag"); node_tmp;
+             node_tmp = node_tmp->next) {
+                tag = g_strdup (node_tmp->content);
+                rtm_task_add_tag (task, tag, NULL);
+        }
 
         node_tmp = rest_xml_node_find (node, "task");
         task->priv->id = g_strdup (rest_xml_node_get_attr (node_tmp, "id"));
@@ -466,6 +488,17 @@ rtm_task_to_string (RtmTask *task)
 {
         g_return_val_if_fail (task != NULL, NULL);
 
+        GList *item;
+        gchar **tags;
+        gint i = 0;
+
+        tags = g_new0 (gchar*, g_list_length (task->priv->tags) + 1);
+        for (item = task->priv->tags; item; item = g_list_next (item)) {
+                tags[i] = (gchar *) item->data;
+                i++;
+        }
+        tags[i] = NULL;
+
         gchar *string = g_strconcat (
                 "RtmTask: [\n",
                 "  ID: ", rtm_util_string_or_null (task->priv->id), "\n",
@@ -476,8 +509,12 @@ rtm_task_to_string (RtmTask *task)
                 "  Name: ", rtm_util_string_or_null (task->priv->name), "\n",
                 "  Priority: ", rtm_util_string_or_null (task->priv->priority), "\n",
                 "  URL: ", rtm_util_string_or_null (task->priv->url), "\n",
+                "  Tags: ", g_strjoinv (", ", tags), "\n",
                 "]\n",
                 NULL);
+
+        g_strfreev (tags);
+
         return string;
 }
 
@@ -515,3 +552,116 @@ rtm_task_set_url (RtmTask *task, gchar* url)
         task->priv->url = g_strdup (url);
         return TRUE;
 }
+
+/**
+ * rtm_task_get_tags:
+ * @list: a #RtmList.
+ *
+ * Gets the tags of a #RtmTask. It returns a copy of the list, use
+ * rtm_task_add_tag() and rtm_task_remove_tag() to manipulate this list.
+ *
+ * Returns: A #GList of #gchar*.
+ */
+GList *
+rtm_task_get_tags (RtmTask *task)
+{
+        g_return_val_if_fail (task != NULL, NULL);
+
+        return g_list_copy (task->priv->tags);
+}
+
+/**
+ * rtm_task_find_tag:
+ * @task: a #RtmTask.
+ * @tag: a tag.
+ *
+ * Finds a tag in the #RtmTask.
+ *
+ * Returns: The tag found or %NULL.
+ */
+gchar *
+rtm_task_find_tag (RtmTask *task, gchar *tag)
+{
+        g_return_val_if_fail (task != NULL, NULL);
+        g_return_val_if_fail (tag != NULL, NULL);
+
+        GList *item;
+        gchar *temp_tag;
+
+        for (item = task->priv->tags; item; item = g_list_next (item)) {
+                temp_tag = (gchar *) item->data;
+                if (g_strcmp0 (temp_tag, tag) == 0) {
+                        return tag;
+                }
+        }
+
+        return NULL;
+}
+
+/**
+ * rtm_task_add_tag:
+ * @task: a #RtmTask.
+ * @tag: a tag.
+ * @error: location to store #GError or %NULL.
+ *
+ * Adds a tag to the current #RtmTask, if is not already assigned.
+ *
+ * Returns: %TRUE if success.
+ */
+gboolean
+rtm_task_add_tag (RtmTask *task, gchar *tag, GError **error)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+        g_return_val_if_fail (tag != NULL, FALSE);
+
+        gchar *existent_tag;
+
+        existent_tag = rtm_task_find_tag (task, tag);
+
+        if (existent_tag != NULL) {
+                g_set_error (
+                        error,
+                        RTM_ERROR_DOMAIN,
+                        RTM_TAG_ALREADY_ASSIGNED,
+                        "Tag \"%s\" already assigned to this task",
+                        tag);
+                return FALSE;
+        }
+
+        task->priv->tags = g_list_append (task->priv->tags, tag);
+        return TRUE;
+}
+
+/**
+ * rtm_task_remove_tag:
+ * @task: a task.
+ * @tag: a tag to be removed.
+ * @error: location to store #GError or %NULL.
+ *
+ * Removes a tag from the current #RtmTask.
+ *
+ * Returns: %TRUE if success.
+ */
+gboolean
+rtm_task_remove_tag (RtmTask *task, gchar *tag, GError **error)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+        g_return_val_if_fail (tag != NULL, FALSE);
+
+        gchar *existent_tag;
+
+        existent_tag = rtm_task_find_tag (task, tag);
+
+        if (existent_tag == NULL) {
+                g_set_error (
+                        error,
+                        RTM_ERROR_DOMAIN,
+                        RTM_TAG_NOT_FOUND,
+                        "Tag \"%s\" was not found on this task", tag);
+                return FALSE;
+        }
+
+        task->priv->tags = g_list_remove (task->priv->tags, existent_tag);
+        return TRUE;
+}
+
