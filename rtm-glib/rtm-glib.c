@@ -1474,7 +1474,7 @@ rtm_glib_tasks_set_url (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         root = rtm_glib_call_method (
                 rtm,
-                RTM_METHOD_TASKS_SET_NAME, &tmp_error,
+                RTM_METHOD_TASKS_SET_URL, &tmp_error,
                 "auth_token", rtm->priv->auth_token,
                 "timeline", timeline,
                 "list_id", rtm_task_get_list_id (task),

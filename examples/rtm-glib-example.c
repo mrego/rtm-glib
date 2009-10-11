@@ -159,6 +159,16 @@ main (gint argc, gchar **argv)
                 g_print ("Task NOT renamed!\n");
         }
 
+        transaction_id = rtm_glib_tasks_set_url (rtm, timeline, task, "http://http://gitorious.org/rtm-glib/", &error);
+        if (error != NULL) {
+                g_error ("%s", rtm_error_get_message (error));
+        }
+        if (transaction_id != NULL) {
+                g_print ("Task URL set! transaction_id: %s\n", transaction_id);
+        } else {
+                g_print ("Task URL NOT set!\n");
+        }
+
         task = rtm_glib_tasks_add (rtm, timeline, "test-rtm-glib2", NULL, FALSE, &error);
         if (error != NULL) {
                 g_error ("%s", rtm_error_get_message (error));
