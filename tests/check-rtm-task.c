@@ -92,10 +92,16 @@ START_TEST (test_load_data)
 {
         RestXmlParser *parser;
         RestXmlNode *node;
+        GList *tags, *item;
+        gchar *tag;
         gchar xml[] =
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
                 "<taskseries id=\"987654\" name=\"Test\" "
                 "url=\"http://gitorious.org/rtm-glib/\">"
+                "<tags>"
+                "<tag>rtm</tag>"
+                "<tag>glib</tag>"
+                "</tags>"
                 "<task id=\"123456\" priority=\"2\" />"
                 "</taskseries>";
 
@@ -118,8 +124,96 @@ START_TEST (test_load_data)
                                 "http://gitorious.org/rtm-glib/") == 0,
                      "Task URL not load properly");
 
+        tags = rtm_task_get_tags (task);
+        fail_unless (g_list_length (tags) == 2,
+                     "Task tags not load properly");
+
+        item = g_list_first (tags);
+        tag = (gchar *) item->data;
+        fail_unless (g_strcmp0 (tag, "rtm") == 0,
+                     "Task firt tag not load properly");
+
+        item = g_list_last (tags);
+        tag = (gchar *) item->data;
+        fail_unless (g_strcmp0 (tag, "glib") == 0,
+                     "Task last tag not load properly");
+
         rest_xml_node_unref (node);
         g_object_unref (parser);
+}
+END_TEST
+
+START_TEST (test_find_tag)
+{
+        gchar *found_tag;
+
+        rtm_task_add_tag (task, "rtm", NULL);
+
+        found_tag = rtm_task_find_tag (task, "rtm");
+        fail_unless (found_tag != NULL, "Tag was not found");
+
+        found_tag = rtm_task_find_tag (task, "glib");
+        fail_unless (found_tag == NULL, "Tag found that does not exists");
+}
+END_TEST
+
+START_TEST (test_add_tag)
+{
+        GList *tags;
+        gchar *tag;
+        GError *error = NULL;
+        gboolean result = FALSE;
+
+        result = rtm_task_add_tag (task, "rtm", &error);
+        fail_unless (error == NULL, "Error must not be filled");
+        fail_unless (result, "Method should return TRUE");
+
+        tags = rtm_task_get_tags (task);
+
+        fail_unless (g_list_length (tags) == 1, "Tag was not added properly");
+
+        tag = (gchar *) tags->data;
+        fail_unless (g_strcmp0 (tag, "rtm") == 0,
+                     "Tag added is not rigth");
+}
+END_TEST
+
+START_TEST (test_add_two_times_the_same_tag)
+{
+        GError *error = NULL;
+        gboolean result = TRUE;
+
+        rtm_task_add_tag (task, "rtm", NULL);
+        result = rtm_task_add_tag (task, "rtm", &error);
+
+        fail_unless (error != NULL, "Error not detected");
+        fail_if (result, "Method should return FALSE");
+        fail_unless (g_list_length (rtm_task_get_tags (task)) == 1,
+                     "Second tag was added to the task");
+}
+END_TEST
+
+START_TEST (test_remove_tag)
+{
+        gchar *tag;
+        GError *error = NULL;
+        gboolean result = FALSE;
+
+        rtm_task_add_tag (task, "rtm", NULL);
+
+        fail_unless (g_list_length (rtm_task_get_tags (task)) == 1,
+                     "Tag was not added properly");
+
+        result = rtm_task_remove_tag (task, "rtm", &error);
+        fail_unless (error == NULL, "Error must not be filled");
+        fail_unless (result, "Method should return TRUE");
+
+        fail_unless (g_list_length (rtm_task_get_tags (task)) == 0,
+                     "Tag was not removed properly");
+
+        result = rtm_task_remove_tag (task, "glib", &error);
+        fail_unless (error != NULL, "Error not detected properly");
+        fail_if (result, "Method should return FALSE");
 }
 END_TEST
 
@@ -162,6 +256,26 @@ check_rtm_task_suite (void)
         tcase_add_checked_fixture (tcase_load_data, setup, teardown);
         tcase_add_test (tcase_load_data, test_load_data);
         suite_add_tcase (suite, tcase_load_data);
+
+        TCase * tcase_find_tag = tcase_create ("Find tag");
+        tcase_add_checked_fixture (tcase_find_tag, setup, teardown);
+        tcase_add_test (tcase_find_tag, test_find_tag);
+        suite_add_tcase (suite, tcase_find_tag);
+
+        TCase * tcase_add_tag = tcase_create ("Add tag");
+        tcase_add_checked_fixture (tcase_add_tag, setup, teardown);
+        tcase_add_test (tcase_add_tag, test_add_tag);
+        suite_add_tcase (suite, tcase_add_tag);
+
+        TCase * tcase_add_two_times_the_same_tag = tcase_create ("Add two times the same tag");
+        tcase_add_checked_fixture (tcase_add_two_times_the_same_tag, setup, teardown);
+        tcase_add_test (tcase_add_two_times_the_same_tag, test_add_two_times_the_same_tag);
+        suite_add_tcase (suite, tcase_add_two_times_the_same_tag);
+
+        TCase * tcase_remove_tag = tcase_create ("Remove tag");
+        tcase_add_checked_fixture (tcase_remove_tag, setup, teardown);
+        tcase_add_test (tcase_remove_tag, test_remove_tag);
+        suite_add_tcase (suite, tcase_remove_tag);
 
         return suite;
 }
