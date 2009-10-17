@@ -179,6 +179,16 @@ main (gint argc, gchar **argv)
                 g_print ("Task tags NOT set!\n");
         }
 
+        transaction_id = rtm_glib_tasks_add_tags (rtm, timeline, task, "gnome,library", &error);
+        if (error != NULL) {
+                g_error ("%s", rtm_error_get_message (error));
+        }
+        if (transaction_id != NULL) {
+                g_print ("Task tags added! transaction_id: %s\n", transaction_id);
+        } else {
+                g_print ("Task tags NOT added!\n");
+        }
+
         task = rtm_glib_tasks_add (rtm, timeline, "test-rtm-glib2", NULL, FALSE, &error);
         if (error != NULL) {
                 g_error ("%s", rtm_error_get_message (error));
