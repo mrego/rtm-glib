@@ -134,4 +134,8 @@ gchar *
 rtm_glib_tasks_set_url (RtmGlib *rtm, gchar* timeline, RtmTask *task,
                         gchar *url, GError **error);
 
+gchar *
+rtm_glib_tasks_set_tags (RtmGlib *rtm, gchar* timeline, RtmTask *task,
+                         gchar *tags, GError **error);
+
 #endif /* __RTM_GLIB_H__ */

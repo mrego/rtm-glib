@@ -148,6 +148,16 @@
    unset. */
 #define RTM_METHOD_TASKS_SET_URL "rtm.tasks.setURL"
 
+/* @param (required): api_key=%s, Your API application key */
+/* @param (required): timeline=%s, The timeline within which to run a method */
+/* @param (required): list_id=%s, The id of the list to perform an action on */
+/* @param (required): taskseries_id=%s, The id of the task series to perform an
+   action on */
+/* @param (required): task_id=%s, The id of the task to perform an action on */
+/* @param (optional): tags=%s, A comma delimited list of tags. An empty value
+   removes any existing tags. */
+#define RTM_METHOD_TASKS_SET_TAGS "rtm.tasks.setTags"
+
 
 #define RTM_GLIB_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE (        \
                                            (obj), RTM_TYPE_GLIB, RtmGlibPrivate))
@@ -1481,6 +1491,61 @@ rtm_glib_tasks_set_url (RtmGlib *rtm, gchar* timeline, RtmTask *task,
                 "taskseries_id", rtm_task_get_taskseries_id (task),
                 "task_id", rtm_task_get_id (task),
                 "url", url,
+                NULL);
+        if (tmp_error != NULL) {
+                g_propagate_error (error, tmp_error);
+                return NULL;
+        }
+
+        node = rest_xml_node_find (root, "transaction");
+        transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
+        g_debug ("transaction_id: %s", transaction_id);
+
+        rest_xml_node_unref (root);
+
+        return transaction_id;
+}
+
+/**
+ * rtm_glib_tasks_set_tags:
+ * @rtm: a #RtmGlib object already authenticated.
+ * @timeline: the timeline within which to run a method.
+ * @task: a #RtmTask to be modified with the new name.
+ * @tags: A comma delimited list of tags. If %NULL, any existing tag will be
+ * unset.
+ *
+ * Sets the tags of a task.
+ *
+ * Returns: The transaction identifier or %NULL if it fails.
+ **/
+gchar *
+rtm_glib_tasks_set_tags (RtmGlib *rtm, gchar* timeline, RtmTask *task,
+                         gchar *tags, GError **error)
+{
+        g_return_val_if_fail (rtm != NULL, NULL);
+        g_return_val_if_fail (rtm->priv->auth_token != NULL, NULL);
+        g_return_val_if_fail (timeline != NULL, NULL);
+        g_return_val_if_fail (task != NULL, NULL);
+
+        if (tags == NULL) {
+                tags = "";
+        }
+
+        RestXmlNode *root, *node;
+        gchar *transaction_id;
+        GError *tmp_error = NULL;
+
+        g_debug ("rtm_glib_tasks_set_tags");
+
+        root = rtm_glib_call_method (
+                rtm,
+                RTM_METHOD_TASKS_SET_TAGS, &tmp_error,
+                "auth_token", rtm->priv->auth_token,
+                "timeline", timeline,
+                "list_id", rtm_task_get_list_id (task),
+                "taskseries_id", rtm_task_get_taskseries_id (task),
+                "task_id", rtm_task_get_id (task),
+                "tags", tags,
                 NULL);
         if (tmp_error != NULL) {
                 g_propagate_error (error, tmp_error);
