@@ -231,12 +231,12 @@ check_rtm_list_suite (void)
         tcase_add_test (tcase_add_task, test_add_task);
         suite_add_tcase (suite, tcase_add_task);
 
-        TCase * tcase_add_two_tasks_with_the_same_id = tcase_create ("Add task");
+        TCase * tcase_add_two_tasks_with_the_same_id = tcase_create ("Add two tasks with the same ID");
         tcase_add_checked_fixture (tcase_add_two_tasks_with_the_same_id, setup, teardown);
         tcase_add_test (tcase_add_two_tasks_with_the_same_id, test_add_two_tasks_with_the_same_id);
         suite_add_tcase (suite, tcase_add_two_tasks_with_the_same_id);
 
-        TCase * tcase_remove_task = tcase_create ("Add task");
+        TCase * tcase_remove_task = tcase_create ("Remove task");
         tcase_add_checked_fixture (tcase_remove_task, setup, teardown);
         tcase_add_test (tcase_remove_task, test_remove_task);
         suite_add_tcase (suite, tcase_remove_task);
