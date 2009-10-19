@@ -171,16 +171,30 @@ main (gint argc, gchar **argv)
                 g_print ("Task URL NOT set!\n");
         }
 
-        transaction_id = rtm_glib_tasks_set_location (rtm, timeline, task, "111222", &error);
+        glist = rtm_glib_locations_get_list (rtm, &error);
         if (error != NULL) {
-                g_warning ("%s", rtm_error_get_message (error));
-                error = NULL;
+                g_error ("%s", rtm_error_get_message (error));
         }
-        if (transaction_id != NULL) {
-                g_print ("Task location set! transaction_id: %s\n", transaction_id);
-        } else {
-                g_print ("Task location NOT set!\n");
+        for (item = glist; item; item = g_list_next (item)) {
+                location = (RtmLocation *) item->data;
+                g_print ("%s", rtm_location_to_string (location));
         }
+
+        item = g_list_first (glist);
+        if (item != NULL) {
+                location = (RtmLocation *) item->data;
+                transaction_id = rtm_glib_tasks_set_location (rtm, timeline, task, rtm_location_get_id(location), &error);
+                if (error != NULL) {
+                        g_error ("%s", rtm_error_get_message (error));
+                }
+                if (transaction_id != NULL) {
+                        g_print ("Task location set! transaction_id: %s\n", transaction_id);
+                } else {
+                        g_print ("Task location NOT set!\n");
+                }
+        }
+
+        g_list_free (glist);
 
         transaction_id = rtm_glib_tasks_set_tags (rtm, timeline, task, "rtm,glib", &error);
         if (error != NULL) {
@@ -290,16 +304,6 @@ main (gint argc, gchar **argv)
         } else {
                 g_print ("List NOT deleted!\n");
         }
-
-        glist = rtm_glib_locations_get_list (rtm, &error);
-        if (error != NULL) {
-                g_error ("%s", rtm_error_get_message (error));
-        }
-        for (item = glist; item; item = g_list_next (item)) {
-                location = (RtmLocation *) item->data;
-                g_print ("%s", rtm_location_to_string (location));
-        }
-        g_list_free (glist);
 
         g_free (frob);
         g_free (url);
