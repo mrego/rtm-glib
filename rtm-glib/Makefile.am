@@ -15,7 +15,9 @@ librtm_glib_la_SOURCES =	\
 	rtm-error.h		\
 	rtm-error.c		\
 	rtm-util.h		\
-	rtm-util.c
+	rtm-util.c		\
+	rtm-location.h		\
+	rtm-location.c
 
 librtm_glib_la_LDFLAGS =	\
 	$(RTM_GLIB_LIBS)
