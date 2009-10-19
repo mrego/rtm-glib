@@ -88,6 +88,15 @@ START_TEST (test_url)
 }
 END_TEST
 
+START_TEST (test_location_id)
+{
+        rtm_task_set_location_id (task, "111222");
+        fail_unless (g_strcmp0 (rtm_task_get_location_id (task),
+                                "111222") == 0,
+                     "Task location ID not set properly");
+}
+END_TEST
+
 START_TEST (test_load_data)
 {
         RestXmlParser *parser;
@@ -97,7 +106,8 @@ START_TEST (test_load_data)
         gchar xml[] =
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
                 "<taskseries id=\"987654\" name=\"Test\" "
-                "url=\"http://gitorious.org/rtm-glib/\">"
+                "url=\"http://gitorious.org/rtm-glib/\" "
+                "location_id=\"111222\">"
                 "<tags>"
                 "<tag>rtm</tag>"
                 "<tag>glib</tag>"
@@ -123,6 +133,9 @@ START_TEST (test_load_data)
         fail_unless (g_strcmp0 (rtm_task_get_url (task),
                                 "http://gitorious.org/rtm-glib/") == 0,
                      "Task URL not load properly");
+        fail_unless (g_strcmp0 (rtm_task_get_location_id (task),
+                                "111222") == 0,
+                     "Task location ID not load properly");
 
         tags = rtm_task_get_tags (task);
         fail_unless (g_list_length (tags) == 2,
@@ -251,6 +264,11 @@ check_rtm_task_suite (void)
         tcase_add_checked_fixture (tcase_url, setup, teardown);
         tcase_add_test (tcase_url, test_url);
         suite_add_tcase (suite, tcase_url);
+
+        TCase * tcase_location_id = tcase_create ("Location ID");
+        tcase_add_checked_fixture (tcase_location_id, setup, teardown);
+        tcase_add_test (tcase_location_id, test_location_id);
+        suite_add_tcase (suite, tcase_location_id);
 
         TCase * tcase_load_data = tcase_create ("Load data");
         tcase_add_checked_fixture (tcase_load_data, setup, teardown);
