@@ -23,6 +23,7 @@
 #include <rtm-glib/rtm-task.h>
 #include <rtm-glib/rtm-error.h>
 #include <rtm-glib/rtm-list.h>
+#include <rtm-glib/rtm-location.h>
 
 
 #define RTM_API_KEY "de4eacaea750baff02b70e6ec57fcf22"
@@ -44,6 +45,7 @@ main (gint argc, gchar **argv)
         RtmList *rtm_list;
         gchar *timeline;
         gchar *transaction_id;
+        RtmLocation *location;
 
         g_thread_init (NULL);
         g_type_init();
@@ -289,6 +291,16 @@ main (gint argc, gchar **argv)
                 g_print ("List NOT deleted!\n");
         }
 
+        glist = rtm_glib_locations_get_list (rtm, &error);
+        if (error != NULL) {
+                g_error ("%s", rtm_error_get_message (error));
+        }
+        for (item = glist; item; item = g_list_next (item)) {
+                location = (RtmLocation *) item->data;
+                g_print ("%s", rtm_location_to_string (location));
+        }
+        g_list_free (glist);
+
         g_free (frob);
         g_free (url);
         g_free (username);
@@ -297,6 +309,7 @@ main (gint argc, gchar **argv)
 
         g_object_unref (task);
         g_object_unref (rtm_list);
+        g_object_unref (location);
         g_object_unref (rtm);
 
         return 0;

@@ -150,4 +150,7 @@ gchar *
 rtm_glib_tasks_set_location (RtmGlib *rtm, gchar* timeline, RtmTask *task,
                              gchar *location_id, GError **error);
 
+GList *
+rtm_glib_locations_get_list (RtmGlib *rtm, GError **error);
+
 #endif /* __RTM_GLIB_H__ */

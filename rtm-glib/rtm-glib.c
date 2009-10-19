@@ -31,6 +31,7 @@
 #include <rest/rest-xml-parser.h>
 #include <rtm-glib.h>
 #include <rtm-error.h>
+#include <rtm-location.h>
 
 
 #define RTM_URL "http://api.rememberthemilk.com/services/rest/"
@@ -185,6 +186,9 @@
 /* @param (required): name=%s, The desired task name */
 /* @param (required): location_id=%s, The id of a location. */
 #define RTM_METHOD_TASKS_SET_LOCATION "rtm.tasks.setLocation"
+
+/* @param (required): api_key=%s, Your API application key */
+#define RTM_METHOD_LOCATIONS_GET_LIST "rtm.locations.getList"
 
 
 #define RTM_GLIB_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE (        \
@@ -1741,4 +1745,46 @@ rtm_glib_tasks_set_location (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         rest_xml_node_unref (root);
 
         return transaction_id;
+}
+
+/**
+ * rtm_glib_locations_get_list:
+ * @rtm: a #RtmGlib object already authenticated.
+ * @error: location to store #GError or %NULL.
+ *
+ * Gets the list of locations.
+ *
+ * Returns: A #GList of #RtmLocation objects.
+ **/
+GList *
+rtm_glib_locations_get_list (RtmGlib *rtm, GError **error)
+{
+        g_return_val_if_fail (rtm != NULL, NULL);
+
+        RestXmlNode *root, *node;
+        GList *list = NULL;
+        RtmLocation *location;
+        GError *tmp_error = NULL;
+
+        g_debug ("rtm_glib_locations_get_list");
+
+        root = rtm_glib_call_method (
+                rtm,
+                RTM_METHOD_LOCATIONS_GET_LIST, &tmp_error,
+                "auth_token", rtm->priv->auth_token,
+                NULL);
+        if (tmp_error != NULL) {
+                g_propagate_error (error, tmp_error);
+                return NULL;
+        }
+
+        for (node = rest_xml_node_find (root, "location"); node; node = node->next) {
+                location = rtm_location_new ();
+                rtm_location_load_data (location, node);
+                list = g_list_append (list, location);
+        }
+
+        rest_xml_node_unref (root);
+
+        return list;
 }
