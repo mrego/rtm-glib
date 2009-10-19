@@ -169,6 +169,17 @@ main (gint argc, gchar **argv)
                 g_print ("Task URL NOT set!\n");
         }
 
+        transaction_id = rtm_glib_tasks_set_location (rtm, timeline, task, "111222", &error);
+        if (error != NULL) {
+                g_warning ("%s", rtm_error_get_message (error));
+                error = NULL;
+        }
+        if (transaction_id != NULL) {
+                g_print ("Task location set! transaction_id: %s\n", transaction_id);
+        } else {
+                g_print ("Task location NOT set!\n");
+        }
+
         transaction_id = rtm_glib_tasks_set_tags (rtm, timeline, task, "rtm,glib", &error);
         if (error != NULL) {
                 g_error ("%s", rtm_error_get_message (error));
