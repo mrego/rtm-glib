@@ -113,4 +113,11 @@ rtm_task_add_tag (RtmTask *task, gchar* tag, GError **error);
 gboolean
 rtm_task_remove_tag (RtmTask *task, gchar* tag, GError **error);
 
+gchar *
+rtm_task_get_location_id (RtmTask *task);
+
+gboolean
+rtm_task_set_location_id (RtmTask *task, gchar* location_id);
+
+
 #endif /* __RTM_TASK_H__ */

@@ -39,6 +39,7 @@ struct _RtmTaskPrivate {
         gchar *name;
         gchar *priority;
         gchar *url;
+        gchar *location_id;
         GList *tags;
 };
 
@@ -51,6 +52,7 @@ enum {
         PROP_NAME,
         PROP_PRIORITY,
         PROP_URL,
+        PROP_LOCATION_ID,
 };
 
 G_DEFINE_TYPE (RtmTask, rtm_task, G_TYPE_OBJECT);
@@ -84,6 +86,10 @@ rtm_task_get_property (GObject *gobject, guint prop_id, GValue *value,
 
         case PROP_URL:
                 g_value_set_string (value, priv->url);
+                break;
+
+        case PROP_LOCATION_ID:
+                g_value_set_string (value, priv->location_id);
                 break;
 
         default:
@@ -130,6 +136,11 @@ rtm_task_set_property (GObject *gobject, guint prop_id, const GValue *value,
                 priv->url = g_value_dup_string (value);
                 break;
 
+        case PROP_LOCATION_ID:
+                g_free (priv->location_id);
+                priv->location_id = g_value_dup_string (value);
+                break;
+
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (gobject, prop_id,
                                                    pspec);
@@ -158,6 +169,7 @@ rtm_task_finalize (GObject *gobject)
         g_free (priv->name);
         g_free (priv->priority);
         g_free (priv->url);
+        g_free (priv->location_id);
 
         G_OBJECT_CLASS (rtm_task_parent_class)->finalize (gobject);
 }
@@ -233,6 +245,16 @@ rtm_task_class_init (RtmTaskClass *klass)
                         "url",
                         "URL",
                         "The URL associated with a task",
+                        NULL,
+                        G_PARAM_READWRITE));
+
+        g_object_class_install_property (
+                gobject_class,
+                PROP_LOCATION_ID,
+                g_param_spec_string (
+                        "location_id",
+                        "Location ID",
+                        "The location identifier of the task",
                         NULL,
                         G_PARAM_READWRITE));
 
@@ -460,6 +482,7 @@ rtm_task_load_data (RtmTask *task, RestXmlNode *node, const gchar *list_id)
         task->priv->taskseries_id = g_strdup (rest_xml_node_get_attr (node, "id"));
         task->priv->name = g_strdup (rest_xml_node_get_attr (node, "name"));
         task->priv->url = g_strdup (rest_xml_node_get_attr (node, "url"));
+        task->priv->location_id = g_strdup (rest_xml_node_get_attr (node, "location_id"));
 
         node_tags = rest_xml_node_find (node, "tags");
         for (node_tmp = rest_xml_node_find (node_tags, "tag"); node_tmp;
@@ -510,6 +533,7 @@ rtm_task_to_string (RtmTask *task)
                 "  Priority: ", rtm_util_string_or_null (task->priv->priority), "\n",
                 "  URL: ", rtm_util_string_or_null (task->priv->url), "\n",
                 "  Tags: ", g_strjoinv (", ", tags), "\n",
+                "  Location ID: ", rtm_util_string_or_null (task->priv->location_id), "\n",
                 "]\n",
                 NULL);
 
@@ -550,6 +574,41 @@ rtm_task_set_url (RtmTask *task, gchar* url)
         g_return_val_if_fail (url != NULL, FALSE);
 
         task->priv->url = g_strdup (url);
+        return TRUE;
+}
+
+/**
+ * rtm_task_get_location_id:
+ * @task: a #RtmTask.
+ *
+ * Gets the #RtmTask:location_id property of the object.
+ *
+ * Returns: the location ID of the task.
+ */
+gchar *
+rtm_task_get_location_id (RtmTask *task)
+{
+        g_return_val_if_fail (task != NULL, NULL);
+
+        return task->priv->location_id;
+}
+
+/**
+ * rtm_task_set_location_id:
+ * @task: a #RtmTask.
+ * @location_id: a location ID for the #RtmTask.
+ *
+ * Sets the #RtmTask:location_id property of the object.
+ *
+ * Returns: %TRUE if location ID is set.
+ */
+gboolean
+rtm_task_set_location_id (RtmTask *task, gchar* location_id)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+        g_return_val_if_fail (location_id != NULL, FALSE);
+
+        task->priv->location_id = g_strdup (location_id);
         return TRUE;
 }
 
