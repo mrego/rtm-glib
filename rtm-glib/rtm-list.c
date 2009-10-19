@@ -242,7 +242,6 @@ rtm_list_set_name (RtmList *list, gchar* name)
  * rtm_list_load_data:
  * @list: a #RtmList.
  * @node: a #RestXmlNode with the #RtmList data.
- * @list_id: the list ID which belongs the #RtmList.
  *
  * Sets the data of the #RtmList object from the #RestXmlNode.
  */
