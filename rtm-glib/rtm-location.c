@@ -482,7 +482,7 @@ rtm_location_set_address (RtmLocation *location, gchar* address)
 gboolean
 rtm_location_is_viewable (RtmLocation *location)
 {
-        g_return_val_if_fail (location != NULL, NULL);
+        g_return_val_if_fail (location != NULL, FALSE);
 
         return location->priv->viewable;
 }
@@ -517,8 +517,6 @@ rtm_location_load_data (RtmLocation *location, RestXmlNode *node)
 {
         g_return_if_fail (location != NULL);
         g_return_if_fail (node != NULL);
-
-        gchar *viewable;
 
         location->priv->id = g_strdup (rest_xml_node_get_attr (node, "id"));
         location->priv->name = g_strdup (rest_xml_node_get_attr (node, "name"));

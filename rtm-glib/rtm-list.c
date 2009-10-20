@@ -395,7 +395,7 @@ rtm_list_set_name (RtmList *list, gchar* name)
 gboolean
 rtm_list_is_deleted (RtmList *list)
 {
-        g_return_val_if_fail (list != NULL, NULL);
+        g_return_val_if_fail (list != NULL, FALSE);
 
         return list->priv->deleted;
 }
@@ -429,7 +429,7 @@ rtm_list_set_deleted (RtmList *list, gboolean deleted)
 gboolean
 rtm_list_is_locked (RtmList *list)
 {
-        g_return_val_if_fail (list != NULL, NULL);
+        g_return_val_if_fail (list != NULL, FALSE);
 
         return list->priv->locked;
 }
@@ -463,7 +463,7 @@ rtm_list_set_locked (RtmList *list, gboolean locked)
 gboolean
 rtm_list_is_archived (RtmList *list)
 {
-        g_return_val_if_fail (list != NULL, NULL);
+        g_return_val_if_fail (list != NULL, FALSE);
 
         return list->priv->archived;
 }
@@ -539,7 +539,7 @@ rtm_list_set_position (RtmList *list, gchar* position)
 gboolean
 rtm_list_is_smart (RtmList *list)
 {
-        g_return_val_if_fail (list != NULL, NULL);
+        g_return_val_if_fail (list != NULL, FALSE);
 
         return list->priv->smart;
 }
