@@ -490,7 +490,7 @@ rtm_location_is_viewable (RtmLocation *location)
 /**
  * rtm_location_set_viewable:
  * @location: a #RtmLocation.
- * @viewable: a viewable for the #RtmLocation.
+ * @viewable: %TRUE to set the the #RtmList as viewable.
  *
  * Sets the #RtmLocation:viewable property of the object.
  *

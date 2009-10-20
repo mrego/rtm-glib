@@ -403,7 +403,7 @@ rtm_list_is_deleted (RtmList *list)
 /**
  * rtm_list_set_deleted:
  * @list: a #RtmList.
- * @deleted: a deleted for the #RtmList.
+ * @deleted: %TRUE to set the the #RtmList as deleted.
  *
  * Sets the #RtmList:deleted property of the object.
  *
@@ -437,7 +437,7 @@ rtm_list_is_locked (RtmList *list)
 /**
  * rtm_list_set_locked:
  * @list: a #RtmList.
- * @locked: a locked for the #RtmList.
+ * @locked: %TRUE to set the the #RtmList as locked.
  *
  * Sets the #RtmList:locked property of the object.
  *
@@ -471,7 +471,7 @@ rtm_list_is_archived (RtmList *list)
 /**
  * rtm_list_set_archived:
  * @list: a #RtmList.
- * @archived: a archived for the #RtmList.
+ * @archived: %TRUE to set the the #RtmList as archived.
  *
  * Sets the #RtmList:archived property of the object.
  *
@@ -547,7 +547,7 @@ rtm_list_is_smart (RtmList *list)
 /**
  * rtm_list_set_smart:
  * @list: a #RtmList.
- * @smart: a smart for the #RtmList.
+ * @smart: %TRUE to set the the #RtmList as smart.
  *
  * Sets the #RtmList:smart property of the object.
  *
