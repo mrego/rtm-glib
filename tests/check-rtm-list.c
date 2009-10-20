@@ -56,13 +56,73 @@ START_TEST (test_name)
 }
 END_TEST
 
+START_TEST (test_deleted)
+{
+        rtm_list_set_deleted (list, TRUE);
+        fail_unless (rtm_list_is_deleted (list),
+                     "List deleted not set properly");
+}
+END_TEST
+
+START_TEST (test_locked)
+{
+        rtm_list_set_locked (list, TRUE);
+        fail_unless (rtm_list_is_locked (list),
+                     "List locked not set properly");
+}
+END_TEST
+
+START_TEST (test_archived)
+{
+        rtm_list_set_archived (list, TRUE);
+        fail_unless (rtm_list_is_archived (list),
+                     "List archived not set properly");
+}
+END_TEST
+
+START_TEST (test_position)
+{
+        rtm_list_set_position (list, "0");
+        fail_unless (g_strcmp0 (rtm_list_get_position (list), "0") == 0,
+                     "List position not set properly");
+}
+END_TEST
+
+START_TEST (test_smart)
+{
+        rtm_list_set_smart (list, TRUE);
+        fail_unless (rtm_list_is_smart (list),
+                     "List smart not set properly");
+}
+END_TEST
+
+START_TEST (test_sort_order)
+{
+        rtm_list_set_sort_order (list, "2");
+        fail_unless (g_strcmp0 (rtm_list_get_sort_order (list), "2") == 0,
+                     "List sort_order not set properly");
+}
+END_TEST
+
+START_TEST (test_filter)
+{
+        rtm_list_set_smart (list, TRUE);
+        rtm_list_set_filter (list, "test");
+        fail_unless (g_strcmp0 (rtm_list_get_filter (list), "test") == 0,
+                     "List filter not set properly");
+}
+END_TEST
+
 START_TEST (test_load_data)
 {
         RestXmlParser *parser;
         RestXmlNode *node;
         gchar xml[] =
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
-                "<list id=\"123456\" name=\"Test\"/>";
+                "<list id=\"123456\" name=\"Test\" deleted=\"0\" locked=\"0\" "
+                "archived=\"0\" position=\"0\" smart=\"1\" sort_order=\"2\">"
+                "<filter>(priority:1)</filter>"
+                "</list>";
 
         parser = rest_xml_parser_new ();
         node = rest_xml_parser_parse_from_data (parser, xml, sizeof (xml) - 1);
@@ -73,6 +133,20 @@ START_TEST (test_load_data)
                      "List ID not set properly");
         fail_unless (g_strcmp0 (rtm_list_get_name (list), "Test") == 0,
                      "List name not load properly");
+        fail_unless (!rtm_list_is_deleted (list),
+                     "List deleted not load properly");
+        fail_unless (!rtm_list_is_locked (list),
+                     "List locked not load properly");
+        fail_unless (!rtm_list_is_archived (list),
+                     "List archived not load properly");
+        fail_unless (g_strcmp0 (rtm_list_get_position (list), "0") == 0,
+                     "List position not load properly");
+        fail_unless (rtm_list_is_smart (list),
+                     "List smart not load properly");
+        fail_unless (g_strcmp0 (rtm_list_get_sort_order (list), "2") == 0,
+                     "List sort_order not load properly");
+        fail_unless (g_strcmp0 (rtm_list_get_filter (list), "(priority:1)") == 0,
+                     "List filter not load properly");
 
         rest_xml_node_unref (node);
         g_object_unref (parser);
@@ -215,6 +289,41 @@ check_rtm_list_suite (void)
         tcase_add_checked_fixture (tcase_name, setup, teardown);
         tcase_add_test (tcase_name, test_name);
         suite_add_tcase (suite, tcase_name);
+
+        TCase * tcase_deleted = tcase_create ("Deleted");
+        tcase_add_checked_fixture (tcase_deleted, setup, teardown);
+        tcase_add_test (tcase_deleted, test_deleted);
+        suite_add_tcase (suite, tcase_deleted);
+
+        TCase * tcase_locked = tcase_create ("Locked");
+        tcase_add_checked_fixture (tcase_locked, setup, teardown);
+        tcase_add_test (tcase_locked, test_locked);
+        suite_add_tcase (suite, tcase_locked);
+
+        TCase * tcase_archived = tcase_create ("Archived");
+        tcase_add_checked_fixture (tcase_archived, setup, teardown);
+        tcase_add_test (tcase_archived, test_archived);
+        suite_add_tcase (suite, tcase_archived);
+
+        TCase * tcase_position = tcase_create ("Position");
+        tcase_add_checked_fixture (tcase_position, setup, teardown);
+        tcase_add_test (tcase_position, test_position);
+        suite_add_tcase (suite, tcase_position);
+
+        TCase * tcase_smart = tcase_create ("Smart");
+        tcase_add_checked_fixture (tcase_smart, setup, teardown);
+        tcase_add_test (tcase_smart, test_smart);
+        suite_add_tcase (suite, tcase_smart);
+
+        TCase * tcase_sort_order = tcase_create ("Sort order");
+        tcase_add_checked_fixture (tcase_sort_order, setup, teardown);
+        tcase_add_test (tcase_sort_order, test_sort_order);
+        suite_add_tcase (suite, tcase_sort_order);
+
+        TCase * tcase_filter = tcase_create ("Filter");
+        tcase_add_checked_fixture (tcase_filter, setup, teardown);
+        tcase_add_test (tcase_filter, test_filter);
+        suite_add_tcase (suite, tcase_filter);
 
         TCase * tcase_load_data = tcase_create ("Load data");
         tcase_add_checked_fixture (tcase_load_data, setup, teardown);
