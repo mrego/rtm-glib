@@ -73,6 +73,48 @@ rtm_list_get_name (RtmList *list);
 gboolean
 rtm_list_set_name (RtmList *list, gchar* name);
 
+gboolean
+rtm_list_is_deleted (RtmList *list);
+
+gboolean
+rtm_list_set_deleted (RtmList *list, gboolean deleted);
+
+gboolean
+rtm_list_is_locked (RtmList *list);
+
+gboolean
+rtm_list_set_locked (RtmList *list, gboolean locked);
+
+gboolean
+rtm_list_is_archived (RtmList *list);
+
+gboolean
+rtm_list_set_archived (RtmList *list, gboolean archived);
+
+gchar *
+rtm_list_get_position (RtmList *list);
+
+gboolean
+rtm_list_set_position (RtmList *list, gchar* position);
+
+gboolean
+rtm_list_is_smart (RtmList *list);
+
+gboolean
+rtm_list_set_smart (RtmList *list, gboolean smart);
+
+gchar *
+rtm_list_get_sort_order (RtmList *list);
+
+gboolean
+rtm_list_set_sort_order (RtmList *list, gchar* sort_order);
+
+gchar *
+rtm_list_get_filter (RtmList *list);
+
+gboolean
+rtm_list_set_filter (RtmList *list, gchar* filter);
+
 void
 rtm_list_load_data (RtmList *list, RestXmlNode *node);
 
