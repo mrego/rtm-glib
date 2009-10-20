@@ -95,6 +95,41 @@ START_TEST (test_viewable)
 }
 END_TEST
 
+START_TEST (test_load_data)
+{
+        RestXmlParser *parser;
+        RestXmlNode *node;
+        gchar xml[] =
+                "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+                "<location id=\"987654321\" name=\"Berlin\" "
+                "longitude=\"13.411508\" latitude=\"52.524008\" zoom=\"9\" "
+                "address=\"Berlin, Germany\" viewable=\"1\" />";
+
+        parser = rest_xml_parser_new ();
+        node = rest_xml_parser_parse_from_data (parser, xml, sizeof (xml) - 1);
+
+        rtm_location_load_data (location, node);
+
+        fail_unless (g_strcmp0 (rtm_location_get_id (location), "987654321") == 0,
+                     "Location ID not set properly");
+        fail_unless (g_strcmp0 (rtm_location_get_name (location), "Berlin") == 0,
+                     "Location name not load properly");
+        fail_unless (g_strcmp0 (rtm_location_get_longitude (location), "13.411508") == 0,
+                     "Location longitude not set properly");
+        fail_unless (g_strcmp0 (rtm_location_get_latitude (location), "52.524008") == 0,
+                     "Location latitude not set properly");
+        fail_unless (g_strcmp0 (rtm_location_get_zoom (location), "9") == 0,
+                     "Location zoom not set properly");
+        fail_unless (g_strcmp0 (rtm_location_get_address (location), "Berlin, Germany") == 0,
+                     "Location address not set properly");
+        fail_unless (rtm_location_is_viewable (location),
+                     "Location viewable not load properly");
+
+        rest_xml_node_unref (node);
+        g_object_unref (parser);
+}
+END_TEST
+
 Suite *
 check_rtm_location_suite (void)
 {
@@ -134,6 +169,11 @@ check_rtm_location_suite (void)
         tcase_add_checked_fixture (tcase_viewable, setup, teardown);
         tcase_add_test (tcase_viewable, test_viewable);
         suite_add_tcase (suite, tcase_viewable);
+
+        TCase * tcase_load_data = tcase_create ("Load data");
+        tcase_add_checked_fixture (tcase_load_data, setup, teardown);
+        tcase_add_test (tcase_load_data, test_load_data);
+        suite_add_tcase (suite, tcase_load_data);
 
         return suite;
 }
