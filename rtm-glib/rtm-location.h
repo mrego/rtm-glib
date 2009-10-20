@@ -98,7 +98,7 @@ gboolean
 rtm_location_set_address (RtmLocation *location, gchar* address);
 
 gboolean
-rtm_location_get_viewable (RtmLocation *location);
+rtm_location_is_viewable (RtmLocation *location);
 
 gboolean
 rtm_location_set_viewable (RtmLocation *location, gboolean viewable);

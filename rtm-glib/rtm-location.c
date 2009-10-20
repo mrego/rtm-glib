@@ -472,15 +472,15 @@ rtm_location_set_address (RtmLocation *location, gchar* address)
 }
 
 /**
- * rtm_location_get_viewable:
+ * rtm_location_is_viewable:
  * @location: a #RtmLocation.
  *
- * Gets the #RtmLocation:viewable property of the object.
+ * Checks the #RtmLocation:viewable property of the object.
  *
- * Returns: the viewable of the location.
+ * Returns: %TRUE if the location is viewable.
  */
 gboolean
-rtm_location_get_viewable (RtmLocation *location)
+rtm_location_is_viewable (RtmLocation *location)
 {
         g_return_val_if_fail (location != NULL, NULL);
 
