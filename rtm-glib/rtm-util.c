@@ -42,3 +42,20 @@ rtm_util_string_or_null (gchar *string) {
 
 	return "NULL";
 }
+
+/**
+ * rtm_util_gboolean_to_string:
+ * @string: a string.
+ *
+ * Returns the strings "TRUE" or "FALSE" depending on the parameter.
+ *
+ * Returns: The string representing a boolean value.
+ */
+gchar *
+rtm_util_gboolean_to_string (gboolean boolean) {
+        if (boolean) {
+                return "TRUE";
+        }
+
+        return "FALSE";
+}
