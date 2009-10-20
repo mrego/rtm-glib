@@ -1,11 +1,13 @@
 TESTS =				\
 	check-rtm-list		\
-	check-rtm-task
+	check-rtm-task		\
+	check-rtm-location
 
 
 check_PROGRAMS =		\
 	check-rtm-list		\
-	check-rtm-task
+	check-rtm-task		\
+	check-rtm-location
 
 
 check_rtm_list_SOURCES =	\
@@ -13,6 +15,9 @@ check_rtm_list_SOURCES =	\
 
 check_rtm_task_SOURCES =	\
 	check-rtm-task.c
+
+check_rtm_location_SOURCES =	\
+	check-rtm-location.c
 
 
 INCLUDES =			\
