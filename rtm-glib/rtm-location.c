@@ -526,13 +526,7 @@ rtm_location_load_data (RtmLocation *location, RestXmlNode *node)
         location->priv->latitude = g_strdup (rest_xml_node_get_attr (node, "latitude"));
         location->priv->zoom = g_strdup (rest_xml_node_get_attr (node, "zoom"));
         location->priv->address = g_strdup (rest_xml_node_get_attr (node, "address"));
-
-        viewable = rest_xml_node_get_attr (node, "viewable");
-        if (g_strcmp0 (viewable, "1") == 0) {
-                location->priv->viewable = TRUE;
-        } else {
-                location->priv->viewable = FALSE;
-        }
+        location->priv->viewable = (g_strcmp0 (rest_xml_node_get_attr (node, "viewable"), "1") == 0);
 }
 
 /**
@@ -549,13 +543,6 @@ rtm_location_to_string (RtmLocation *location)
         g_return_val_if_fail (location != NULL, NULL);
 
         gchar *string;
-        gchar *viewable;
-
-        if (location->priv->viewable) {
-                viewable = "TRUE";
-        } else {
-                viewable = "FALSE";
-        }
 
         string = g_strconcat (
                 "RtmLocation: [\n",
@@ -565,7 +552,7 @@ rtm_location_to_string (RtmLocation *location)
                 "  Latitude: ", rtm_util_string_or_null (location->priv->latitude), "\n",
                 "  Zoom: ", rtm_util_string_or_null (location->priv->zoom), "\n",
                 "  Address: ", rtm_util_string_or_null (location->priv->address), "\n",
-                "  Viewable: ", viewable, "\n",
+                "  Viewable: ", rtm_util_gboolean_to_string (location->priv->viewable), "\n",
                 "]\n",
                 NULL);
 
