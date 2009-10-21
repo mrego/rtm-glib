@@ -125,4 +125,22 @@ rtm_task_get_due_date (RtmTask *task);
 gboolean
 rtm_task_set_due_date (RtmTask *task, GTimeVal *due_date);
 
+GTimeVal *
+rtm_task_get_added_date (RtmTask *task);
+
+gboolean
+rtm_task_set_added_date (RtmTask *task, GTimeVal *added_date);
+
+GTimeVal *
+rtm_task_get_completed_date (RtmTask *task);
+
+gboolean
+rtm_task_set_completed_date (RtmTask *task, GTimeVal *completed_date);
+
+GTimeVal *
+rtm_task_get_deleted_date (RtmTask *task);
+
+gboolean
+rtm_task_set_deleted_date (RtmTask *task, GTimeVal *deleted_date);
+
 #endif /* __RTM_TASK_H__ */
