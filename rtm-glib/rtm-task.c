@@ -41,6 +41,9 @@ struct _RtmTaskPrivate {
         gchar *url;
         gchar *location_id;
         GTimeVal *due_date;
+        GTimeVal *added_date;
+        GTimeVal *completed_date;
+        GTimeVal *deleted_date;
         GList *tags;
 };
 
@@ -173,6 +176,15 @@ rtm_task_finalize (GObject *gobject)
         g_free (priv->location_id);
         if (priv->due_date) {
                 g_free (priv->due_date);
+        }
+        if (priv->added_date) {
+                g_free (priv->added_date);
+        }
+        if (priv->completed_date) {
+                g_free (priv->completed_date);
+        }
+        if (priv->deleted_date) {
+                g_free (priv->deleted_date);
         }
 
         G_OBJECT_CLASS (rtm_task_parent_class)->finalize (gobject);
@@ -482,8 +494,8 @@ rtm_task_load_data (RtmTask *task, RestXmlNode *node, const gchar *list_id)
 
         RestXmlNode *node_tags, *node_tmp;
         gchar *tag;
-        gchar *due;
-        GTimeVal due_date;
+        gchar *due, *added, *completed, *deleted;
+        GTimeVal due_date, added_date, completed_date, deleted_date;
 
         task->priv->taskseries_id = g_strdup (rest_xml_node_get_attr (node, "id"));
         task->priv->name = g_strdup (rest_xml_node_get_attr (node, "name"));
@@ -505,6 +517,24 @@ rtm_task_load_data (RtmTask *task, RestXmlNode *node, const gchar *list_id)
         if (due && (g_strcmp0 (due, "") != 0)) {
                 g_time_val_from_iso8601 (due, &due_date);
                 task->priv->due_date = rtm_util_g_time_val_dup (&due_date);
+        }
+
+        added = rest_xml_node_get_attr (node_tmp, "added");
+        if (added && (g_strcmp0 (added, "") != 0)) {
+                g_time_val_from_iso8601 (added, &added_date);
+                task->priv->added_date = rtm_util_g_time_val_dup (&added_date);
+        }
+
+        completed = rest_xml_node_get_attr (node_tmp, "completed");
+        if (completed && (g_strcmp0 (completed, "") != 0)) {
+                g_time_val_from_iso8601 (completed, &completed_date);
+                task->priv->completed_date = rtm_util_g_time_val_dup (&completed_date);
+        }
+
+        deleted = rest_xml_node_get_attr (node_tmp, "deleted");
+        if (deleted && (g_strcmp0 (deleted, "") != 0)) {
+                g_time_val_from_iso8601 (deleted, &deleted_date);
+                task->priv->deleted_date = rtm_util_g_time_val_dup (&deleted_date);
         }
 
         task->priv->list_id = g_strdup (list_id);
@@ -547,6 +577,9 @@ rtm_task_to_string (RtmTask *task)
                 "  Tags: ", g_strjoinv (", ", tags), "\n",
                 "  Location ID: ", rtm_util_string_or_null (task->priv->location_id), "\n",
                 "  Due date: ", rtm_util_g_time_val_to_string (task->priv->due_date), "\n",
+                "  Added date: ", rtm_util_g_time_val_to_string (task->priv->added_date), "\n",
+                "  Completed date: ", rtm_util_g_time_val_to_string (task->priv->completed_date), "\n",
+                "  Deleted date: ", rtm_util_g_time_val_to_string (task->priv->deleted_date), "\n",
                 "]\n",
                 NULL);
 
@@ -772,3 +805,107 @@ rtm_task_remove_tag (RtmTask *task, gchar *tag, GError **error)
         return TRUE;
 }
 
+/**
+ * rtm_task_get_added_date:
+ * @task: a #RtmTask.
+ *
+ * Gets the #RtmTask:added_date property of the object.
+ *
+ * Returns: the added date of the task.
+ */
+GTimeVal *
+rtm_task_get_added_date (RtmTask *task)
+{
+        g_return_val_if_fail (task != NULL, NULL);
+
+        return task->priv->added_date;
+}
+
+/**
+ * rtm_task_set_added_date:
+ * @task: a #RtmTask.
+ * @added_date: a added date for the #RtmTask.
+ *
+ * Sets the #RtmTask:added_date property of the object.
+ *
+ * Returns: %TRUE if added_date is set.
+ */
+gboolean
+rtm_task_set_added_date (RtmTask *task, GTimeVal *added_date)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+        g_return_val_if_fail (added_date != NULL, FALSE);
+
+        task->priv->added_date = rtm_util_g_time_val_dup (added_date);
+        return TRUE;
+}
+
+/**
+ * rtm_task_get_completed_date:
+ * @task: a #RtmTask.
+ *
+ * Gets the #RtmTask:completed_date property of the object.
+ *
+ * Returns: the completed date of the task.
+ */
+GTimeVal *
+rtm_task_get_completed_date (RtmTask *task)
+{
+        g_return_val_if_fail (task != NULL, NULL);
+
+        return task->priv->completed_date;
+}
+
+/**
+ * rtm_task_set_completed_date:
+ * @task: a #RtmTask.
+ * @completed_date: a completed date for the #RtmTask.
+ *
+ * Sets the #RtmTask:completed_date property of the object.
+ *
+ * Returns: %TRUE if completed_date is set.
+ */
+gboolean
+rtm_task_set_completed_date (RtmTask *task, GTimeVal *completed_date)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+        g_return_val_if_fail (completed_date != NULL, FALSE);
+
+        task->priv->completed_date = rtm_util_g_time_val_dup (completed_date);
+        return TRUE;
+}
+
+/**
+ * rtm_task_get_deleted_date:
+ * @task: a #RtmTask.
+ *
+ * Gets the #RtmTask:deleted_date property of the object.
+ *
+ * Returns: the deleted date of the task.
+ */
+GTimeVal *
+rtm_task_get_deleted_date (RtmTask *task)
+{
+        g_return_val_if_fail (task != NULL, NULL);
+
+        return task->priv->deleted_date;
+}
+
+/**
+ * rtm_task_set_deleted_date:
+ * @task: a #RtmTask.
+ * @deleted_date: a deleted date for the #RtmTask.
+ *
+ * Sets the #RtmTask:deleted_date property of the object.
+ *
+ * Returns: %TRUE if deleted_date is set.
+ */
+gboolean
+rtm_task_set_deleted_date (RtmTask *task, GTimeVal *deleted_date)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+        g_return_val_if_fail (deleted_date != NULL, FALSE);
+
+        task->priv->deleted_date = rtm_util_g_time_val_dup (deleted_date);
+        return TRUE;
+}
