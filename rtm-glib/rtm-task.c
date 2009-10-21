@@ -46,6 +46,7 @@ struct _RtmTaskPrivate {
         GTimeVal *completed_date;
         GTimeVal *deleted_date;
         gchar *estimate;
+        guint postponed;
         GList *tags;
 };
 
@@ -61,6 +62,7 @@ enum {
         PROP_LOCATION_ID,
         PROP_HAS_DUE_TIME,
         PROP_ESTIMATE,
+        PROP_POSTPONED,
 };
 
 G_DEFINE_TYPE (RtmTask, rtm_task, G_TYPE_OBJECT);
@@ -106,6 +108,10 @@ rtm_task_get_property (GObject *gobject, guint prop_id, GValue *value,
 
         case PROP_ESTIMATE:
                 g_value_set_string (value, priv->estimate);
+                break;
+
+        case PROP_POSTPONED:
+                g_value_set_uint (value, priv->postponed);
                 break;
 
         default:
@@ -164,6 +170,10 @@ rtm_task_set_property (GObject *gobject, guint prop_id, const GValue *value,
         case PROP_ESTIMATE:
                 g_free (priv->estimate);
                 priv->estimate = g_value_dup_string (value);
+                break;
+
+        case PROP_POSTPONED:
+                priv->postponed = g_value_get_uint (value);
                 break;
 
         default:
@@ -314,6 +324,18 @@ rtm_task_class_init (RtmTaskClass *klass)
                         "Estimate",
                         "The estimate duration of the task",
                         NULL,
+                        G_PARAM_READWRITE));
+
+        g_object_class_install_property (
+                gobject_class,
+                PROP_POSTPONED,
+                g_param_spec_uint (
+                        "postponed",
+                        "Postponed",
+                        "The number of times postponed the task was postponed",
+                        0,
+                        G_MAXUINT,
+                        0,
                         G_PARAM_READWRITE));
 
 }
@@ -582,6 +604,10 @@ rtm_task_load_data (RtmTask *task, RestXmlNode *node, const gchar *list_id)
         }
 
         task->priv->estimate = g_strdup (rest_xml_node_get_attr (node_tmp, "estimate"));
+        const gchar *postponed = rest_xml_node_get_attr (node_tmp, "postponed");
+        if (postponed && (g_strcmp0 (postponed, "") != 0)) {
+                task->priv->postponed = (guint) g_strtod (postponed, NULL);
+        }
 
         task->priv->list_id = g_strdup (list_id);
 }
@@ -602,6 +628,7 @@ rtm_task_to_string (RtmTask *task)
         GList *item;
         gchar **tags;
         gint i = 0;
+        gchar *postponed;
 
         tags = g_new0 (gchar*, g_list_length (task->priv->tags) + 1);
         for (item = task->priv->tags; item; item = g_list_next (item)) {
@@ -609,6 +636,8 @@ rtm_task_to_string (RtmTask *task)
                 i++;
         }
         tags[i] = NULL;
+
+        postponed = g_strdup_printf ("%d", task->priv->postponed);
 
         gchar *string = g_strconcat (
                 "RtmTask: [\n",
@@ -628,10 +657,13 @@ rtm_task_to_string (RtmTask *task)
                 "  Completed date: ", rtm_util_g_time_val_to_string (task->priv->completed_date), "\n",
                 "  Deleted date: ", rtm_util_g_time_val_to_string (task->priv->deleted_date), "\n",
                 "  Estimate duration: ", rtm_util_string_or_null (task->priv->estimate), "\n",
+                "  Times postponed: ", postponed, "\n",
                 "]\n",
                 NULL);
 
         g_strfreev (tags);
+
+        g_free (postponed);
 
         return string;
 }
@@ -1024,5 +1056,40 @@ rtm_task_set_estimate (RtmTask *task, gchar* estimate)
         g_return_val_if_fail (estimate != NULL, FALSE);
 
         task->priv->estimate = g_strdup (estimate);
+        return TRUE;
+}
+
+/**
+ * rtm_task_get_postponed:
+ * @task: a #RtmTask.
+ *
+ * Gets the #RtmTask:postponed property of the object.
+ *
+ * Returns: the postponed of the task.
+ */
+guint
+rtm_task_get_postponed (RtmTask *task)
+{
+        g_return_val_if_fail (task != NULL, 0);
+
+        return task->priv->postponed;
+}
+
+/**
+ * rtm_task_set_postponed:
+ * @task: a #RtmTask.
+ * @postponed: a postponed for the #RtmTask.
+ *
+ * Sets the #RtmTask:postponed property of the object.
+ *
+ * Returns: %TRUE if postponed is set.
+ */
+gboolean
+rtm_task_set_postponed (RtmTask *task, guint postponed)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+        g_return_val_if_fail (postponed >= 0, FALSE);
+
+        task->priv->postponed = postponed;
         return TRUE;
 }

@@ -155,4 +155,10 @@ rtm_task_get_estimate (RtmTask *task);
 gboolean
 rtm_task_set_estimate (RtmTask *task, gchar* estimate);
 
+guint
+rtm_task_get_postponed (RtmTask *task);
+
+gboolean
+rtm_task_set_postponed (RtmTask *task, guint postponed);
+
 #endif /* __RTM_TASK_H__ */
