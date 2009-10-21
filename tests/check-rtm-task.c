@@ -145,6 +145,14 @@ START_TEST (test_deleted_date)
 }
 END_TEST
 
+START_TEST (test_has_due_time)
+{
+        rtm_task_set_has_due_time (task, TRUE);
+        fail_unless (rtm_task_has_due_time (task),
+                     "Task has_due_time not set properly");
+}
+END_TEST
+
 START_TEST (test_load_data)
 {
         RestXmlParser *parser;
@@ -161,8 +169,9 @@ START_TEST (test_load_data)
                 "<tag>glib</tag>"
                 "</tags>"
                 "<task id=\"123456\" priority=\"2\" "
-                "due=\"2006-05-07T10:19:54Z\" added=\"2006-04-07T10:19:54Z\" "
-                "completed=\"2006-06-07T10:19:54Z\" deleted=\"2006-07-07T10:19:54Z\" />"
+                "due=\"2006-05-07T10:19:54Z\" has_due_time=\"1\" "
+                "added=\"2006-04-07T10:19:54Z\" completed=\"2006-06-07T10:19:54Z\" "
+                "deleted=\"2006-07-07T10:19:54Z\" />"
                 "</taskseries>";
 
         parser = rest_xml_parser_new ();
@@ -198,6 +207,8 @@ START_TEST (test_load_data)
         fail_unless (g_strcmp0 (g_time_val_to_iso8601 (rtm_task_get_deleted_date (task)),
                                 "2006-07-07T10:19:54Z") == 0,
                      "Task deleted date not load properly");
+        fail_unless (rtm_task_has_due_time (task),
+                     "Task has_due_time not set properly");
 
         tags = rtm_task_get_tags (task);
         fail_unless (g_list_length (tags) == 2,
@@ -351,6 +362,11 @@ check_rtm_task_suite (void)
         tcase_add_checked_fixture (tcase_deleted_date, setup, teardown);
         tcase_add_test (tcase_deleted_date, test_deleted_date);
         suite_add_tcase (suite, tcase_deleted_date);
+
+        TCase * tcase_has_due_time = tcase_create ("Has due time");
+        tcase_add_checked_fixture (tcase_has_due_time, setup, teardown);
+        tcase_add_test (tcase_has_due_time, test_has_due_time);
+        suite_add_tcase (suite, tcase_has_due_time);
 
         TCase * tcase_load_data = tcase_create ("Load data");
         tcase_add_checked_fixture (tcase_load_data, setup, teardown);
