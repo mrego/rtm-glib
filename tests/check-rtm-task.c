@@ -153,6 +153,14 @@ START_TEST (test_has_due_time)
 }
 END_TEST
 
+START_TEST (test_estimate)
+{
+        rtm_task_set_estimate (task, "2 hours");
+        fail_unless (g_strcmp0 (rtm_task_get_estimate (task), "2 hours") == 0,
+                     "Task estimate not set properly");
+}
+END_TEST
+
 START_TEST (test_load_data)
 {
         RestXmlParser *parser;
@@ -171,7 +179,7 @@ START_TEST (test_load_data)
                 "<task id=\"123456\" priority=\"2\" "
                 "due=\"2006-05-07T10:19:54Z\" has_due_time=\"1\" "
                 "added=\"2006-04-07T10:19:54Z\" completed=\"2006-06-07T10:19:54Z\" "
-                "deleted=\"2006-07-07T10:19:54Z\" />"
+                "deleted=\"2006-07-07T10:19:54Z\" estimate=\"2 hours\" />"
                 "</taskseries>";
 
         parser = rest_xml_parser_new ();
@@ -209,6 +217,8 @@ START_TEST (test_load_data)
                      "Task deleted date not load properly");
         fail_unless (rtm_task_has_due_time (task),
                      "Task has_due_time not set properly");
+        fail_unless (g_strcmp0 (rtm_task_get_estimate (task), "2 hours") == 0,
+                     "Task estimate not load properly");
 
         tags = rtm_task_get_tags (task);
         fail_unless (g_list_length (tags) == 2,
