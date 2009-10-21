@@ -119,5 +119,10 @@ rtm_task_get_location_id (RtmTask *task);
 gboolean
 rtm_task_set_location_id (RtmTask *task, gchar* location_id);
 
+GTimeVal *
+rtm_task_get_due_date (RtmTask *task);
+
+gboolean
+rtm_task_set_due_date (RtmTask *task, GTimeVal *due_date);
 
 #endif /* __RTM_TASK_H__ */

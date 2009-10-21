@@ -40,6 +40,7 @@ struct _RtmTaskPrivate {
         gchar *priority;
         gchar *url;
         gchar *location_id;
+        GTimeVal *due_date;
         GList *tags;
 };
 
@@ -170,6 +171,9 @@ rtm_task_finalize (GObject *gobject)
         g_free (priv->priority);
         g_free (priv->url);
         g_free (priv->location_id);
+        if (priv->due_date) {
+                g_free (priv->due_date);
+        }
 
         G_OBJECT_CLASS (rtm_task_parent_class)->finalize (gobject);
 }
@@ -478,6 +482,8 @@ rtm_task_load_data (RtmTask *task, RestXmlNode *node, const gchar *list_id)
 
         RestXmlNode *node_tags, *node_tmp;
         gchar *tag;
+        gchar *due;
+        GTimeVal due_date;
 
         task->priv->taskseries_id = g_strdup (rest_xml_node_get_attr (node, "id"));
         task->priv->name = g_strdup (rest_xml_node_get_attr (node, "name"));
@@ -494,6 +500,12 @@ rtm_task_load_data (RtmTask *task, RestXmlNode *node, const gchar *list_id)
         node_tmp = rest_xml_node_find (node, "task");
         task->priv->id = g_strdup (rest_xml_node_get_attr (node_tmp, "id"));
         task->priv->priority = g_strdup (rest_xml_node_get_attr (node_tmp, "priority"));
+
+        due = rest_xml_node_get_attr (node_tmp, "due");
+        if (due && (g_strcmp0 (due, "") != 0)) {
+                g_time_val_from_iso8601 (due, &due_date);
+                task->priv->due_date = rtm_util_g_time_val_dup (&due_date);
+        }
 
         task->priv->list_id = g_strdup (list_id);
 }
@@ -534,6 +546,7 @@ rtm_task_to_string (RtmTask *task)
                 "  URL: ", rtm_util_string_or_null (task->priv->url), "\n",
                 "  Tags: ", g_strjoinv (", ", tags), "\n",
                 "  Location ID: ", rtm_util_string_or_null (task->priv->location_id), "\n",
+                "  Due date: ", rtm_util_g_time_val_to_string (task->priv->due_date), "\n",
                 "]\n",
                 NULL);
 
@@ -609,6 +622,41 @@ rtm_task_set_location_id (RtmTask *task, gchar* location_id)
         g_return_val_if_fail (location_id != NULL, FALSE);
 
         task->priv->location_id = g_strdup (location_id);
+        return TRUE;
+}
+
+/**
+ * rtm_task_get_due_date:
+ * @task: a #RtmTask.
+ *
+ * Gets the #RtmTask:due_date property of the object.
+ *
+ * Returns: the due date of the task.
+ */
+GTimeVal *
+rtm_task_get_due_date (RtmTask *task)
+{
+        g_return_val_if_fail (task != NULL, NULL);
+
+        return task->priv->due_date;
+}
+
+/**
+ * rtm_task_set_due_date:
+ * @task: a #RtmTask.
+ * @due_date: a due date for the #RtmTask.
+ *
+ * Sets the #RtmTask:due_date property of the object.
+ *
+ * Returns: %TRUE if due_date is set.
+ */
+gboolean
+rtm_task_set_due_date (RtmTask *task, GTimeVal *due_date)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+        g_return_val_if_fail (due_date != NULL, FALSE);
+
+        task->priv->due_date = rtm_util_g_time_val_dup (due_date);
         return TRUE;
 }
 
