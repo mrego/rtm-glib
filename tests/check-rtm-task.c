@@ -161,6 +161,14 @@ START_TEST (test_estimate)
 }
 END_TEST
 
+START_TEST (test_postponed)
+{
+        rtm_task_set_postponed (task, 4);
+        fail_unless (rtm_task_get_postponed (task) == 4,
+                     "Task postponed not set properly");
+}
+END_TEST
+
 START_TEST (test_load_data)
 {
         RestXmlParser *parser;
@@ -179,7 +187,8 @@ START_TEST (test_load_data)
                 "<task id=\"123456\" priority=\"2\" "
                 "due=\"2006-05-07T10:19:54Z\" has_due_time=\"1\" "
                 "added=\"2006-04-07T10:19:54Z\" completed=\"2006-06-07T10:19:54Z\" "
-                "deleted=\"2006-07-07T10:19:54Z\" estimate=\"2 hours\" />"
+                "deleted=\"2006-07-07T10:19:54Z\" postponed=\"4\" "
+                "estimate=\"2 hours\" />"
                 "</taskseries>";
 
         parser = rest_xml_parser_new ();
@@ -219,6 +228,8 @@ START_TEST (test_load_data)
                      "Task has_due_time not set properly");
         fail_unless (g_strcmp0 (rtm_task_get_estimate (task), "2 hours") == 0,
                      "Task estimate not load properly");
+        fail_unless (rtm_task_get_postponed (task) == 4,
+                     "Task postponed not load properly");
 
         tags = rtm_task_get_tags (task);
         fail_unless (g_list_length (tags) == 2,
@@ -377,6 +388,11 @@ check_rtm_task_suite (void)
         tcase_add_checked_fixture (tcase_has_due_time, setup, teardown);
         tcase_add_test (tcase_has_due_time, test_has_due_time);
         suite_add_tcase (suite, tcase_has_due_time);
+
+        TCase * tcase_postponed = tcase_create ("Postponed");
+        tcase_add_checked_fixture (tcase_postponed, setup, teardown);
+        tcase_add_test (tcase_postponed, test_postponed);
+        suite_add_tcase (suite, tcase_postponed);
 
         TCase * tcase_load_data = tcase_create ("Load data");
         tcase_add_checked_fixture (tcase_load_data, setup, teardown);
