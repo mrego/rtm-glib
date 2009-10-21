@@ -97,6 +97,18 @@ START_TEST (test_location_id)
 }
 END_TEST
 
+START_TEST (test_due_date)
+{
+        gchar * due = "2006-05-07T10:19:54Z";
+        GTimeVal due_date;
+        g_time_val_from_iso8601 (due, &due_date);
+
+        rtm_task_set_due_date (task, &due_date);
+        fail_unless (g_strcmp0 (g_time_val_to_iso8601 (rtm_task_get_due_date (task)), "2006-05-07T10:19:54Z") == 0,
+                     "Task due_date not set properly");
+}
+END_TEST
+
 START_TEST (test_load_data)
 {
         RestXmlParser *parser;
@@ -112,7 +124,8 @@ START_TEST (test_load_data)
                 "<tag>rtm</tag>"
                 "<tag>glib</tag>"
                 "</tags>"
-                "<task id=\"123456\" priority=\"2\" />"
+                "<task id=\"123456\" priority=\"2\" "
+                "due=\"2006-05-07T10:19:54Z\" />"
                 "</taskseries>";
 
         parser = rest_xml_parser_new ();
@@ -136,6 +149,9 @@ START_TEST (test_load_data)
         fail_unless (g_strcmp0 (rtm_task_get_location_id (task),
                                 "111222") == 0,
                      "Task location ID not load properly");
+        fail_unless (g_strcmp0 (g_time_val_to_iso8601 (rtm_task_get_due_date (task)),
+                                "2006-05-07T10:19:54Z") == 0,
+                     "Task due date not load properly");
 
         tags = rtm_task_get_tags (task);
         fail_unless (g_list_length (tags) == 2,
@@ -144,7 +160,7 @@ START_TEST (test_load_data)
         item = g_list_first (tags);
         tag = (gchar *) item->data;
         fail_unless (g_strcmp0 (tag, "rtm") == 0,
-                     "Task firt tag not load properly");
+                     "Task first tag not load properly");
 
         item = g_list_last (tags);
         tag = (gchar *) item->data;
@@ -269,6 +285,11 @@ check_rtm_task_suite (void)
         tcase_add_checked_fixture (tcase_location_id, setup, teardown);
         tcase_add_test (tcase_location_id, test_location_id);
         suite_add_tcase (suite, tcase_location_id);
+
+        TCase * tcase_due_date = tcase_create ("Due date");
+        tcase_add_checked_fixture (tcase_due_date, setup, teardown);
+        tcase_add_test (tcase_due_date, test_due_date);
+        suite_add_tcase (suite, tcase_due_date);
 
         TCase * tcase_load_data = tcase_create ("Load data");
         tcase_add_checked_fixture (tcase_load_data, setup, teardown);
