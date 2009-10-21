@@ -149,4 +149,10 @@ rtm_task_has_due_time (RtmTask *task);
 gboolean
 rtm_task_set_has_due_time (RtmTask *task, gboolean has_due_time);
 
+gchar *
+rtm_task_get_estimate (RtmTask *task);
+
+gboolean
+rtm_task_set_estimate (RtmTask *task, gchar* estimate);
+
 #endif /* __RTM_TASK_H__ */

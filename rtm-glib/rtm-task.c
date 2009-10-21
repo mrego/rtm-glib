@@ -45,6 +45,7 @@ struct _RtmTaskPrivate {
         GTimeVal *added_date;
         GTimeVal *completed_date;
         GTimeVal *deleted_date;
+        gchar *estimate;
         GList *tags;
 };
 
@@ -59,6 +60,7 @@ enum {
         PROP_URL,
         PROP_LOCATION_ID,
         PROP_HAS_DUE_TIME,
+        PROP_ESTIMATE,
 };
 
 G_DEFINE_TYPE (RtmTask, rtm_task, G_TYPE_OBJECT);
@@ -100,6 +102,10 @@ rtm_task_get_property (GObject *gobject, guint prop_id, GValue *value,
 
         case PROP_HAS_DUE_TIME:
                 g_value_set_boolean (value, priv->has_due_time);
+                break;
+
+        case PROP_ESTIMATE:
+                g_value_set_string (value, priv->estimate);
                 break;
 
         default:
@@ -155,6 +161,11 @@ rtm_task_set_property (GObject *gobject, guint prop_id, const GValue *value,
                 priv->has_due_time = g_value_get_boolean (value);
                 break;
 
+        case PROP_ESTIMATE:
+                g_free (priv->estimate);
+                priv->estimate = g_value_dup_string (value);
+                break;
+
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (gobject, prop_id,
                                                    pspec);
@@ -196,6 +207,7 @@ rtm_task_finalize (GObject *gobject)
         if (priv->deleted_date) {
                 g_free (priv->deleted_date);
         }
+        g_free (priv->estimate);
 
         G_OBJECT_CLASS (rtm_task_parent_class)->finalize (gobject);
 }
@@ -292,6 +304,16 @@ rtm_task_class_init (RtmTaskClass *klass)
                         "Has due time",
                         "    Specifies whether the due date has a due time",
                         FALSE,
+                        G_PARAM_READWRITE));
+
+        g_object_class_install_property (
+                gobject_class,
+                PROP_ESTIMATE,
+                g_param_spec_string (
+                        "estimate",
+                        "Estimate",
+                        "The estimate duration of the task",
+                        NULL,
                         G_PARAM_READWRITE));
 
 }
@@ -559,6 +581,8 @@ rtm_task_load_data (RtmTask *task, RestXmlNode *node, const gchar *list_id)
                 task->priv->deleted_date = rtm_util_g_time_val_dup (&deleted_date);
         }
 
+        task->priv->estimate = g_strdup (rest_xml_node_get_attr (node_tmp, "estimate"));
+
         task->priv->list_id = g_strdup (list_id);
 }
 
@@ -603,6 +627,7 @@ rtm_task_to_string (RtmTask *task)
                 "  Added date: ", rtm_util_g_time_val_to_string (task->priv->added_date), "\n",
                 "  Completed date: ", rtm_util_g_time_val_to_string (task->priv->completed_date), "\n",
                 "  Deleted date: ", rtm_util_g_time_val_to_string (task->priv->deleted_date), "\n",
+                "  Estimate duration: ", rtm_util_string_or_null (task->priv->estimate), "\n",
                 "]\n",
                 NULL);
 
@@ -964,5 +989,40 @@ rtm_task_set_has_due_time (RtmTask *task, gboolean has_due_time)
         g_return_val_if_fail (task != NULL, FALSE);
 
         task->priv->has_due_time = has_due_time;
+        return TRUE;
+}
+
+/**
+ * rtm_task_get_estimate:
+ * @task: a #RtmTask.
+ *
+ * Gets the #RtmTask:estimate property of the object.
+ *
+ * Returns: the estimate duration of the task.
+ */
+gchar *
+rtm_task_get_estimate (RtmTask *task)
+{
+        g_return_val_if_fail (task != NULL, NULL);
+
+        return task->priv->estimate;
+}
+
+/**
+ * rtm_task_set_estimate:
+ * @task: a #RtmTask.
+ * @estimate: a estimate duration for the #RtmTask.
+ *
+ * Sets the #RtmTask:estimate property of the object.
+ *
+ * Returns: %TRUE if estimate duration is set.
+ */
+gboolean
+rtm_task_set_estimate (RtmTask *task, gchar* estimate)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+        g_return_val_if_fail (estimate != NULL, FALSE);
+
+        task->priv->estimate = g_strdup (estimate);
         return TRUE;
 }
