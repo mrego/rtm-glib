@@ -143,4 +143,10 @@ rtm_task_get_deleted_date (RtmTask *task);
 gboolean
 rtm_task_set_deleted_date (RtmTask *task, GTimeVal *deleted_date);
 
+gboolean
+rtm_task_has_due_time (RtmTask *task);
+
+gboolean
+rtm_task_set_has_due_time (RtmTask *task, gboolean has_due_time);
+
 #endif /* __RTM_TASK_H__ */

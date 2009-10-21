@@ -41,6 +41,7 @@ struct _RtmTaskPrivate {
         gchar *url;
         gchar *location_id;
         GTimeVal *due_date;
+        gboolean has_due_time;
         GTimeVal *added_date;
         GTimeVal *completed_date;
         GTimeVal *deleted_date;
@@ -57,6 +58,7 @@ enum {
         PROP_PRIORITY,
         PROP_URL,
         PROP_LOCATION_ID,
+        PROP_HAS_DUE_TIME,
 };
 
 G_DEFINE_TYPE (RtmTask, rtm_task, G_TYPE_OBJECT);
@@ -94,6 +96,10 @@ rtm_task_get_property (GObject *gobject, guint prop_id, GValue *value,
 
         case PROP_LOCATION_ID:
                 g_value_set_string (value, priv->location_id);
+                break;
+
+        case PROP_HAS_DUE_TIME:
+                g_value_set_boolean (value, priv->has_due_time);
                 break;
 
         default:
@@ -143,6 +149,10 @@ rtm_task_set_property (GObject *gobject, guint prop_id, const GValue *value,
         case PROP_LOCATION_ID:
                 g_free (priv->location_id);
                 priv->location_id = g_value_dup_string (value);
+                break;
+
+        case PROP_HAS_DUE_TIME:
+                priv->has_due_time = g_value_get_boolean (value);
                 break;
 
         default:
@@ -272,6 +282,16 @@ rtm_task_class_init (RtmTaskClass *klass)
                         "Location ID",
                         "The location identifier of the task",
                         NULL,
+                        G_PARAM_READWRITE));
+
+        g_object_class_install_property (
+                gobject_class,
+                PROP_HAS_DUE_TIME,
+                g_param_spec_boolean (
+                        "has_due_time",
+                        "Has due time",
+                        "    Specifies whether the due date has a due time",
+                        FALSE,
                         G_PARAM_READWRITE));
 
 }
@@ -519,6 +539,8 @@ rtm_task_load_data (RtmTask *task, RestXmlNode *node, const gchar *list_id)
                 task->priv->due_date = rtm_util_g_time_val_dup (&due_date);
         }
 
+        task->priv->has_due_time = (g_strcmp0 (rest_xml_node_get_attr (node_tmp, "has_due_time"), "1") == 0);
+
         added = rest_xml_node_get_attr (node_tmp, "added");
         if (added && (g_strcmp0 (added, "") != 0)) {
                 g_time_val_from_iso8601 (added, &added_date);
@@ -577,6 +599,7 @@ rtm_task_to_string (RtmTask *task)
                 "  Tags: ", g_strjoinv (", ", tags), "\n",
                 "  Location ID: ", rtm_util_string_or_null (task->priv->location_id), "\n",
                 "  Due date: ", rtm_util_g_time_val_to_string (task->priv->due_date), "\n",
+                "  Has due time: ", rtm_util_gboolean_to_string (task->priv->has_due_time), "\n",
                 "  Added date: ", rtm_util_g_time_val_to_string (task->priv->added_date), "\n",
                 "  Completed date: ", rtm_util_g_time_val_to_string (task->priv->completed_date), "\n",
                 "  Deleted date: ", rtm_util_g_time_val_to_string (task->priv->deleted_date), "\n",
@@ -907,5 +930,39 @@ rtm_task_set_deleted_date (RtmTask *task, GTimeVal *deleted_date)
         g_return_val_if_fail (deleted_date != NULL, FALSE);
 
         task->priv->deleted_date = rtm_util_g_time_val_dup (deleted_date);
+        return TRUE;
+}
+
+/**
+ * rtm_task_has_due_time:
+ * @task: a #RtmTask.
+ *
+ * Checks the #RtmTask:has_due_time property of the object.
+ *
+ * Returns: %TRUE if the task due date has a due time.
+ */
+gboolean
+rtm_task_has_due_time (RtmTask *task)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+
+        return task->priv->has_due_time;
+}
+
+/**
+ * rtm_task_set_has_due_time:
+ * @task: a #RtmTask.
+ * @has_due_time: %TRUE to specify that the task due date has a due time.
+ *
+ * Sets the #RtmTask:has_due_time property of the object.
+ *
+ * Returns: %TRUE if has_due_time is set.
+ */
+gboolean
+rtm_task_set_has_due_time (RtmTask *task, gboolean has_due_time)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+
+        task->priv->has_due_time = has_due_time;
         return TRUE;
 }
