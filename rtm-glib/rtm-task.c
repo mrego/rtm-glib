@@ -494,7 +494,7 @@ rtm_task_load_data (RtmTask *task, RestXmlNode *node, const gchar *list_id)
 
         RestXmlNode *node_tags, *node_tmp;
         gchar *tag;
-        gchar *due, *added, *completed, *deleted;
+        const gchar *due, *added, *completed, *deleted;
         GTimeVal due_date, added_date, completed_date, deleted_date;
 
         task->priv->taskseries_id = g_strdup (rest_xml_node_get_attr (node, "id"));
