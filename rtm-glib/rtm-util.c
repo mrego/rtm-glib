@@ -35,7 +35,8 @@
  * Returns: The string or the text "NULL".
  */
 gchar *
-rtm_util_string_or_null (gchar *string) {
+rtm_util_string_or_null (gchar *string)
+{
 	if (string) {
 		return string;
 	}
@@ -45,17 +46,57 @@ rtm_util_string_or_null (gchar *string) {
 
 /**
  * rtm_util_gboolean_to_string:
- * @string: a string.
+ * @boolean: a boolean.
  *
  * Returns the strings "TRUE" or "FALSE" depending on the parameter.
  *
  * Returns: The string representing a boolean value.
  */
 gchar *
-rtm_util_gboolean_to_string (gboolean boolean) {
+rtm_util_gboolean_to_string (gboolean boolean)
+{
         if (boolean) {
                 return "TRUE";
         }
 
         return "FALSE";
+}
+
+/**
+ * rtm_util_g_time_val_dup:
+ * @time_val: a #GTimeVal pointer.
+ *
+ * Returns pointer to a copy of the #GTimeVal.
+ *
+ * Returns: A copy of the #GTimeVal.
+ */
+GTimeVal *
+rtm_util_g_time_val_dup (GTimeVal *time_val)
+{
+        g_return_val_if_fail (time_val != NULL, NULL);
+
+        GTimeVal *new_time_val = g_new0 (GTimeVal, 1);
+        new_time_val->tv_sec = time_val->tv_sec;
+        new_time_val->tv_usec = time_val->tv_usec;
+
+        return new_time_val;
+}
+
+/**
+ * rtm_util_g_time_val_to_string:
+ * @time_val: a #GTimeVal.
+ *
+ * Returns an string representing the #GTimeVal if it is not %NULL, otherwise
+ * returns "NULL".
+ *
+ * Returns: The string represeting the #GTimeVal or "NULL".
+ */
+gchar *
+rtm_util_g_time_val_to_string (GTimeVal *time_val)
+{
+        if (time_val) {
+                return g_time_val_to_iso8601 (time_val);
+        } else {
+                return "NULL";
+        }
 }

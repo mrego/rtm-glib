@@ -25,3 +25,9 @@ rtm_util_string_or_null (gchar *string);
 
 gchar *
 rtm_util_gboolean_to_string (gboolean boolean);
+
+GTimeVal *
+rtm_util_g_time_val_dup (GTimeVal *time_val);
+
+gchar *
+rtm_util_g_time_val_to_string (GTimeVal *time_val);
