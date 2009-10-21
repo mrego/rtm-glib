@@ -192,6 +192,7 @@ main (gint argc, gchar **argv)
                 } else {
                         g_print ("Task location NOT set!\n");
                 }
+                g_object_unref (location);
         }
 
         g_list_free (glist);
@@ -313,7 +314,6 @@ main (gint argc, gchar **argv)
 
         g_object_unref (task);
         g_object_unref (rtm_list);
-        g_object_unref (location);
         g_object_unref (rtm);
 
         return 0;
