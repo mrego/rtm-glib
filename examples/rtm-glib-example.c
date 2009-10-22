@@ -171,6 +171,16 @@ main (gint argc, gchar **argv)
                 g_print ("Task URL NOT set!\n");
         }
 
+        transaction_id = rtm_glib_tasks_set_priority (rtm, timeline, task, "2", &error);
+        if (error != NULL) {
+                g_error ("%s", rtm_error_get_message (error));
+        }
+        if (transaction_id != NULL) {
+                g_print ("Task priority set! transaction_id: %s\n", transaction_id);
+        } else {
+                g_print ("Task priority NOT set!\n");
+        }
+
         glist = rtm_glib_locations_get_list (rtm, &error);
         if (error != NULL) {
                 g_error ("%s", rtm_error_get_message (error));

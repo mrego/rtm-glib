@@ -153,4 +153,8 @@ rtm_glib_tasks_set_location (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 GList *
 rtm_glib_locations_get_list (RtmGlib *rtm, GError **error);
 
+gchar *
+rtm_glib_tasks_set_priority (RtmGlib *rtm, gchar* timeline, RtmTask *task,
+                             gchar *priority, GError **error);
+
 #endif /* __RTM_GLIB_H__ */
