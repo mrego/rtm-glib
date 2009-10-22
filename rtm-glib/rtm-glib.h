@@ -161,4 +161,8 @@ gchar *
 rtm_glib_tasks_complete (RtmGlib *rtm, gchar* timeline, RtmTask *task,
                          GError **error);
 
+gchar *
+rtm_glib_tasks_uncomplete (RtmGlib *rtm, gchar* timeline, RtmTask *task,
+                           GError **error);
+
 #endif /* __RTM_GLIB_H__ */
