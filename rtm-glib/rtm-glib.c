@@ -266,6 +266,21 @@
    will be unset. */
 #define RTM_METHOD_TASKS_SET_ESTIMATE "rtm.tasks.setEstimate"
 
+/* @param (required): api_key=%s, Your API application key */
+/* @param (required): timeline=%s, The timeline within which to run a method */
+/* @param (required): list_id=%s, The id of the list to perform an action on */
+/* @param (required): taskseries_id=%s, The id of the task series to perform an
+   action on */
+/* @param (required): task_id=%s, The id of the task to perform an action on */
+/* @param (optional): due=%s, Due date for a task, in ISO 8601 format. If parse
+   is specified and has a value of 1, due is parsed as per rtm.time.parse. due
+   is parsed in the context of the user's Remember The Milk timezone. */
+/* @param (optional): has_due_time=%s, Specifies whether the due date has a due
+   time. */
+/* @param (optional): parse=%s, Specifies whether to parse due as per
+   rtm.time.parse. */
+#define RTM_METHOD_TASKS_SET_DUE_DATE "rtm.tasks.setDueDate"
+
 
 #define RTM_GLIB_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE (        \
                                            (obj), RTM_TYPE_GLIB, RtmGlibPrivate))
@@ -2272,6 +2287,81 @@ rtm_glib_tasks_set_estimate (RtmGlib *rtm, gchar* timeline, RtmTask *task,
                 "taskseries_id", rtm_task_get_taskseries_id (task),
                 "task_id", rtm_task_get_id (task),
                 "estimate", estimate,
+                NULL);
+        if (tmp_error != NULL) {
+                g_propagate_error (error, tmp_error);
+                return NULL;
+        }
+
+        node = rest_xml_node_find (root, "transaction");
+        transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
+        g_debug ("transaction_id: %s", transaction_id);
+
+        rest_xml_node_unref (root);
+
+        return transaction_id;
+}
+
+/**
+ * rtm_glib_tasks_set_due_date:
+ * @rtm: a #RtmGlib object already authenticated.
+ * @timeline: the timeline within which to run a method.
+ * @task: a #RtmTask to be modified with the new name.
+ * @due: Due date for a task, in ISO 8601 format.
+ * @has_due_time: Specifies whether the due date has a due time.
+ * @parse: Specifies whether to parse due as per rtm.time.parse.
+ * @error: location to store #GError or %NULL.
+ *
+ * Sets the due date of a task. If @due is not provided, any existing due date
+ * will be unset. If @has_due_time is provided, the due date will be marked as
+ * one with a time. If @parse is %TRUE, @due is parsed as per rtm.time.parse.
+ *
+ * Returns: The transaction identifier or %NULL if it fails.
+ **/
+gchar *
+rtm_glib_tasks_set_due_date (RtmGlib *rtm, gchar* timeline, RtmTask *task,
+                             gchar *due, gboolean has_due_time,
+                             gboolean parse, GError **error)
+{
+        g_return_val_if_fail (rtm != NULL, NULL);
+        g_return_val_if_fail (rtm->priv->auth_token != NULL, NULL);
+        g_return_val_if_fail (timeline != NULL, NULL);
+        g_return_val_if_fail (task != NULL, NULL);
+
+        if (due == NULL) {
+                due = "";
+        }
+
+        RestXmlNode *root, *node;
+        gchar *transaction_id;
+        GError *tmp_error = NULL;
+        gchar *has_due_time_value, *parse_value;
+
+        if (has_due_time) {
+                has_due_time_value = "1";
+        } else {
+                has_due_time_value = "0";
+        }
+
+        if (parse) {
+                parse_value = "1";
+        } else {
+                parse_value = "0";
+        }
+
+        g_debug ("rtm_glib_tasks_set_due_date");
+
+        root = rtm_glib_call_method (
+                rtm,
+                RTM_METHOD_TASKS_SET_DUE_DATE, &tmp_error,
+                "auth_token", rtm->priv->auth_token,
+                "timeline", timeline,
+                "list_id", rtm_task_get_list_id (task),
+                "taskseries_id", rtm_task_get_taskseries_id (task),
+                "task_id", rtm_task_get_id (task),
+                "due", due,
+                "has_due_time", has_due_time_value,
+                "parse", parse_value,
                 NULL);
         if (tmp_error != NULL) {
                 g_propagate_error (error, tmp_error);

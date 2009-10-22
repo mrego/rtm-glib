@@ -185,4 +185,9 @@ gchar *
 rtm_glib_tasks_set_estimate (RtmGlib *rtm, gchar* timeline, RtmTask *task,
                              gchar *estimate, GError **error);
 
+gchar *
+rtm_glib_tasks_set_due_date (RtmGlib *rtm, gchar* timeline, RtmTask *task,
+                             gchar *due, gboolean has_due_time,
+                             gboolean parse, GError **error);
+
 #endif /* __RTM_GLIB_H__ */
