@@ -113,7 +113,7 @@ main (gint argc, gchar **argv)
         }
         for (item = glist; item; item = g_list_next (item)) {
                 rtm_list = (RtmList *) item->data;
-                if (g_strcmp0 (rtm_list_get_name (rtm_list), "Sent")) {
+                if (g_strcmp0 (rtm_list_get_name (rtm_list), "Sent") == 0) {
                         list_id_sent = rtm_list_get_id (rtm_list);
                 }
                 g_print ("%s", rtm_list_to_string (rtm_list));
