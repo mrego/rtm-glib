@@ -169,6 +169,54 @@ START_TEST (test_postponed)
 }
 END_TEST
 
+START_TEST (test_created_date)
+{
+        gchar * created = "2006-05-07T10:19:54Z";
+        GTimeVal created_date;
+        g_time_val_from_iso8601 (created, &created_date);
+
+        rtm_task_set_created_date (task, &created_date);
+        fail_unless (g_strcmp0 (g_time_val_to_iso8601 (rtm_task_get_created_date (task)), "2006-05-07T10:19:54Z") == 0,
+                     "Task created_date not set properly");
+}
+END_TEST
+
+START_TEST (test_modified_date)
+{
+        gchar * modified = "2006-05-07T10:19:54Z";
+        GTimeVal modified_date;
+        g_time_val_from_iso8601 (modified, &modified_date);
+
+        rtm_task_set_modified_date (task, &modified_date);
+        fail_unless (g_strcmp0 (g_time_val_to_iso8601 (rtm_task_get_modified_date (task)), "2006-05-07T10:19:54Z") == 0,
+                     "Task modified_date not set properly");
+}
+END_TEST
+
+START_TEST (test_source)
+{
+        rtm_task_set_source (task, "js");
+        fail_unless (g_strcmp0 (rtm_task_get_source (task), "js") == 0,
+                     "Task source not set properly");
+}
+END_TEST
+
+START_TEST (test_recurrence)
+{
+        rtm_task_set_recurrence (task, "FREQ=MONTHLY;INTERVAL=1");
+        fail_unless (g_strcmp0 (rtm_task_get_recurrence (task), "FREQ=MONTHLY;INTERVAL=1") == 0,
+                     "Task recurrence not set properly");
+}
+END_TEST
+
+START_TEST (test_recurrence_every)
+{
+        rtm_task_set_recurrence_every (task, TRUE);
+        fail_unless (rtm_task_is_recurrence_every (task),
+                     "Task recurrence_every not set properly");
+}
+END_TEST
+
 START_TEST (test_load_data)
 {
         RestXmlParser *parser;
@@ -179,7 +227,9 @@ START_TEST (test_load_data)
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
                 "<taskseries id=\"987654\" name=\"Test\" "
                 "url=\"http://gitorious.org/rtm-glib/\" "
-                "location_id=\"111222\">"
+                "location_id=\"111222\" created=\"2006-04-07T10:19:54Z\" "
+                "modified=\"2006-07-07T10:19:54Z\" source=\"js\" >"
+                "<rrule every=\"1\">FREQ=MONTHLY;INTERVAL=1</rrule>"
                 "<tags>"
                 "<tag>rtm</tag>"
                 "<tag>glib</tag>"
@@ -230,6 +280,16 @@ START_TEST (test_load_data)
                      "Task estimate not load properly");
         fail_unless (rtm_task_get_postponed (task) == 4,
                      "Task postponed not load properly");
+        fail_unless (g_strcmp0 (g_time_val_to_iso8601 (rtm_task_get_created_date (task)), "2006-04-07T10:19:54Z") == 0,
+                     "Task created_date not set properly");
+        fail_unless (g_strcmp0 (g_time_val_to_iso8601 (rtm_task_get_modified_date (task)), "2006-07-07T10:19:54Z") == 0,
+                     "Task modified_date not set properly");
+        fail_unless (g_strcmp0 (rtm_task_get_source (task), "js") == 0,
+                     "Task source not set properly");
+        fail_unless (g_strcmp0 (rtm_task_get_recurrence (task), "FREQ=MONTHLY;INTERVAL=1") == 0,
+                     "Task recurrence not set properly");
+        fail_unless (rtm_task_is_recurrence_every (task),
+                     "Task recurrence_every not set properly");
 
         tags = rtm_task_get_tags (task);
         fail_unless (g_list_length (tags) == 2,
@@ -393,6 +453,31 @@ check_rtm_task_suite (void)
         tcase_add_checked_fixture (tcase_postponed, setup, teardown);
         tcase_add_test (tcase_postponed, test_postponed);
         suite_add_tcase (suite, tcase_postponed);
+
+        TCase * tcase_created_date = tcase_create ("Created date");
+        tcase_add_checked_fixture (tcase_created_date, setup, teardown);
+        tcase_add_test (tcase_created_date, test_created_date);
+        suite_add_tcase (suite, tcase_created_date);
+
+        TCase * tcase_modified_date = tcase_create ("Modified date");
+        tcase_add_checked_fixture (tcase_modified_date, setup, teardown);
+        tcase_add_test (tcase_modified_date, test_modified_date);
+        suite_add_tcase (suite, tcase_modified_date);
+
+        TCase * tcase_source = tcase_create ("Source");
+        tcase_add_checked_fixture (tcase_source, setup, teardown);
+        tcase_add_test (tcase_source, test_source);
+        suite_add_tcase (suite, tcase_source);
+
+        TCase * tcase_recurrence = tcase_create ("Recurrence");
+        tcase_add_checked_fixture (tcase_recurrence, setup, teardown);
+        tcase_add_test (tcase_recurrence, test_recurrence);
+        suite_add_tcase (suite, tcase_recurrence);
+
+        TCase * tcase_recurrence_every = tcase_create ("Recurrence every");
+        tcase_add_checked_fixture (tcase_recurrence_every, setup, teardown);
+        tcase_add_test (tcase_recurrence_every, test_recurrence_every);
+        suite_add_tcase (suite, tcase_recurrence_every);
 
         TCase * tcase_load_data = tcase_create ("Load data");
         tcase_add_checked_fixture (tcase_load_data, setup, teardown);
