@@ -173,4 +173,8 @@ gchar *
 rtm_glib_tasks_postpone (RtmGlib *rtm, gchar* timeline, RtmTask *task,
                          GError **error);
 
+gchar *
+rtm_glib_tasks_move_to (RtmGlib *rtm, gchar* timeline, RtmTask *task,
+                        gchar *list_id, GError **error);
+
 #endif /* __RTM_GLIB_H__ */

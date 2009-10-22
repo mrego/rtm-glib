@@ -222,7 +222,7 @@
 /* @param (required): taskseries_id=%s, The id of the task series to perform an
    action on */
 /* @param (required): task_id=%s, The id of the task to perform an action on */
-/* @param (require): direction=%s, The direction to move a priority. Either up
+/* @param (required): direction=%s, The direction to move a priority. Either up
    or down. */
 #define RTM_METHOD_TASKS_MOVE_PRIORITY "rtm.tasks.movePriority"
 
@@ -233,6 +233,15 @@
    action on */
 /* @param (required): task_id=%s, The id of the task to perform an action on */
 #define RTM_METHOD_TASKS_POSTPONE "rtm.tasks.postpone"
+
+/* @param (required): api_key=%s, Your API application key */
+/* @param (required): timeline=%s, The timeline within which to run a method */
+/* @param (required): from_list_id=%s, The originating list id. */
+/* @param (required): to_list_id=%s, The target list id. */
+/* @param (required): taskseries_id=%s, The id of the task series to perform an
+   action on */
+/* @param (required): task_id=%s, The id of the task to perform an action on */
+#define RTM_METHOD_TASKS_MOVE_TO "rtm.tasks.moveTo"
 
 
 #define RTM_GLIB_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE (        \
@@ -2073,6 +2082,58 @@ rtm_glib_tasks_postpone (RtmGlib *rtm, gchar* timeline, RtmTask *task,
                 "auth_token", rtm->priv->auth_token,
                 "timeline", timeline,
                 "list_id", rtm_task_get_list_id (task),
+                "taskseries_id", rtm_task_get_taskseries_id (task),
+                "task_id", rtm_task_get_id (task),
+                NULL);
+        if (tmp_error != NULL) {
+                g_propagate_error (error, tmp_error);
+                return NULL;
+        }
+
+        node = rest_xml_node_find (root, "transaction");
+        transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
+        g_debug ("transaction_id: %s", transaction_id);
+
+        rest_xml_node_unref (root);
+
+        return transaction_id;
+}
+
+/**
+ * rtm_glib_tasks_move_to:
+ * @rtm: a #RtmGlib object already authenticated.
+ * @timeline: the timeline within which to run a method.
+ * @task: a #RtmTask to be modified with the new name.
+ * @list_id: The target list id.
+ * @error: location to store #GError or %NULL.
+ *
+ * Move a task between lists.
+ *
+ * Returns: The transaction identifier or %NULL if it fails.
+ **/
+gchar *
+rtm_glib_tasks_move_to (RtmGlib *rtm, gchar* timeline, RtmTask *task,
+                        gchar *list_id, GError **error)
+{
+        g_return_val_if_fail (rtm != NULL, NULL);
+        g_return_val_if_fail (rtm->priv->auth_token != NULL, NULL);
+        g_return_val_if_fail (timeline != NULL, NULL);
+        g_return_val_if_fail (task != NULL, NULL);
+        g_return_val_if_fail (list_id != NULL, NULL);
+
+        RestXmlNode *root, *node;
+        gchar *transaction_id;
+        GError *tmp_error = NULL;
+
+        g_debug ("rtm_glib_tasks_move_to");
+
+        root = rtm_glib_call_method (
+                rtm,
+                RTM_METHOD_TASKS_MOVE_TO, &tmp_error,
+                "auth_token", rtm->priv->auth_token,
+                "timeline", timeline,
+                "from_list_id", rtm_task_get_list_id (task),
+                "to_list_id", list_id,
                 "taskseries_id", rtm_task_get_taskseries_id (task),
                 "task_id", rtm_task_get_id (task),
                 NULL);

@@ -46,6 +46,7 @@ main (gint argc, gchar **argv)
         gchar *timeline;
         gchar *transaction_id;
         RtmLocation *location;
+        gchar *list_id_sent;
 
         g_thread_init (NULL);
         g_type_init();
@@ -112,6 +113,9 @@ main (gint argc, gchar **argv)
         }
         for (item = glist; item; item = g_list_next (item)) {
                 rtm_list = (RtmList *) item->data;
+                if (g_strcmp0 (rtm_list_get_name (rtm_list), "Sent")) {
+                        list_id_sent = rtm_list_get_id (rtm_list);
+                }
                 g_print ("%s", rtm_list_to_string (rtm_list));
         }
         g_list_free (glist);
@@ -219,6 +223,16 @@ main (gint argc, gchar **argv)
                 g_print ("Task postponed! transaction_id: %s\n", transaction_id);
         } else {
                 g_print ("Task NOT postponed!\n");
+        }
+
+        transaction_id = rtm_glib_tasks_move_to (rtm, timeline, task, list_id_sent, &error);
+        if (error != NULL) {
+                g_error ("%s", rtm_error_get_message (error));
+        }
+        if (transaction_id != NULL) {
+                g_print ("Task moved! transaction_id: %s\n", transaction_id);
+        } else {
+                g_print ("Task NOT moved!\n");
         }
 
         glist = rtm_glib_locations_get_list (rtm, &error);
@@ -361,6 +375,7 @@ main (gint argc, gchar **argv)
         g_free (username);
         g_free (timeline);
         g_free (transaction_id);
+        g_free (list_id_sent);
 
         g_object_unref (task);
         g_object_unref (rtm_list);
