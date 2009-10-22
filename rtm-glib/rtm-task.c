@@ -47,6 +47,11 @@ struct _RtmTaskPrivate {
         GTimeVal *deleted_date;
         gchar *estimate;
         guint postponed;
+        GTimeVal *created_date;
+        GTimeVal *modified_date;
+        gchar *source;
+        gchar *recurrence;
+        gboolean recurrence_every;
         GList *tags;
 };
 
@@ -63,6 +68,9 @@ enum {
         PROP_HAS_DUE_TIME,
         PROP_ESTIMATE,
         PROP_POSTPONED,
+        PROP_SOURCE,
+        PROP_RECURRENCE,
+        PROP_RECURRENCE_EVERY,
 };
 
 G_DEFINE_TYPE (RtmTask, rtm_task, G_TYPE_OBJECT);
@@ -112,6 +120,18 @@ rtm_task_get_property (GObject *gobject, guint prop_id, GValue *value,
 
         case PROP_POSTPONED:
                 g_value_set_uint (value, priv->postponed);
+                break;
+
+        case PROP_SOURCE:
+                g_value_set_string (value, priv->source);
+                break;
+
+        case PROP_RECURRENCE:
+                g_value_set_string (value, priv->recurrence);
+                break;
+
+        case PROP_RECURRENCE_EVERY:
+                g_value_set_boolean (value, priv->recurrence_every);
                 break;
 
         default:
@@ -176,6 +196,20 @@ rtm_task_set_property (GObject *gobject, guint prop_id, const GValue *value,
                 priv->postponed = g_value_get_uint (value);
                 break;
 
+        case PROP_SOURCE:
+                g_free (priv->source);
+                priv->source = g_value_dup_string (value);
+                break;
+
+        case PROP_RECURRENCE:
+                g_free (priv->recurrence);
+                priv->recurrence = g_value_dup_string (value);
+                break;
+
+        case PROP_RECURRENCE_EVERY:
+                priv->recurrence_every = g_value_get_boolean (value);
+                break;
+
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (gobject, prop_id,
                                                    pspec);
@@ -218,6 +252,14 @@ rtm_task_finalize (GObject *gobject)
                 g_free (priv->deleted_date);
         }
         g_free (priv->estimate);
+        if (priv->created_date) {
+                g_free (priv->created_date);
+        }
+        if (priv->modified_date) {
+                g_free (priv->modified_date);
+        }
+        g_free (priv->source);
+        g_free (priv->recurrence);
 
         G_OBJECT_CLASS (rtm_task_parent_class)->finalize (gobject);
 }
@@ -312,7 +354,7 @@ rtm_task_class_init (RtmTaskClass *klass)
                 g_param_spec_boolean (
                         "has_due_time",
                         "Has due time",
-                        "    Specifies whether the due date has a due time",
+                        "Specifies whether the due date has a due time",
                         FALSE,
                         G_PARAM_READWRITE));
 
@@ -336,6 +378,36 @@ rtm_task_class_init (RtmTaskClass *klass)
                         0,
                         G_MAXUINT,
                         0,
+                        G_PARAM_READWRITE));
+
+        g_object_class_install_property (
+                gobject_class,
+                PROP_SOURCE,
+                g_param_spec_string (
+                        "source",
+                        "Source",
+                        "The source of the task",
+                        NULL,
+                        G_PARAM_READWRITE));
+
+        g_object_class_install_property (
+                gobject_class,
+                PROP_RECURRENCE,
+                g_param_spec_string (
+                        "recurrence",
+                        "Recurrence",
+                        "The recurrence of the task",
+                        NULL,
+                        G_PARAM_READWRITE));
+
+        g_object_class_install_property (
+                gobject_class,
+                PROP_RECURRENCE_EVERY,
+                g_param_spec_boolean (
+                        "recurrence_every",
+                        "Recurrence every",
+                        "Specifies if the recurrence is going to be repeated always or not",
+                        FALSE,
                         G_PARAM_READWRITE));
 
 }
@@ -558,13 +630,33 @@ rtm_task_load_data (RtmTask *task, RestXmlNode *node, const gchar *list_id)
 
         RestXmlNode *node_tags, *node_tmp;
         gchar *tag;
-        const gchar *due, *added, *completed, *deleted;
-        GTimeVal due_date, added_date, completed_date, deleted_date;
+        const gchar *due, *added, *completed, *deleted, *created, *modified;
+        GTimeVal due_date, added_date, completed_date, deleted_date,
+                created_date, modified_date;
 
         task->priv->taskseries_id = g_strdup (rest_xml_node_get_attr (node, "id"));
         task->priv->name = g_strdup (rest_xml_node_get_attr (node, "name"));
         task->priv->url = g_strdup (rest_xml_node_get_attr (node, "url"));
         task->priv->location_id = g_strdup (rest_xml_node_get_attr (node, "location_id"));
+        task->priv->source = g_strdup (rest_xml_node_get_attr (node, "source"));
+
+        created = rest_xml_node_get_attr (node, "created");
+        if (created && (g_strcmp0 (created, "") != 0)) {
+                g_time_val_from_iso8601 (created, &created_date);
+                task->priv->created_date = rtm_util_g_time_val_dup (&created_date);
+        }
+
+        modified = rest_xml_node_get_attr (node, "modified");
+        if (modified && (g_strcmp0 (modified, "") != 0)) {
+                g_time_val_from_iso8601 (modified, &modified_date);
+                task->priv->modified_date = rtm_util_g_time_val_dup (&modified_date);
+        }
+
+        node_tmp = rest_xml_node_find (node, "rrule");
+        if (node_tmp) {
+                task->priv->recurrence_every = (g_strcmp0 (rest_xml_node_get_attr (node_tmp, "every"), "1") == 0);
+                task->priv->recurrence = g_strdup (node_tmp->content);
+        }
 
         node_tags = rest_xml_node_find (node, "tags");
         for (node_tmp = rest_xml_node_find (node_tags, "tag"); node_tmp;
@@ -658,6 +750,11 @@ rtm_task_to_string (RtmTask *task)
                 "  Deleted date: ", rtm_util_g_time_val_to_string (task->priv->deleted_date), "\n",
                 "  Estimate duration: ", rtm_util_string_or_null (task->priv->estimate), "\n",
                 "  Times postponed: ", postponed, "\n",
+                "  Created date: ", rtm_util_g_time_val_to_string (task->priv->created_date), "\n",
+                "  Modified date: ", rtm_util_g_time_val_to_string (task->priv->modified_date), "\n",
+                "  Source: ", rtm_util_string_or_null (task->priv->source), "\n",
+                "  Recurrence: ", rtm_util_string_or_null (task->priv->recurrence), "\n",
+                "  Recurrence every: ", rtm_util_gboolean_to_string (task->priv->recurrence_every), "\n",
                 "]\n",
                 NULL);
 
@@ -1091,5 +1188,179 @@ rtm_task_set_postponed (RtmTask *task, guint postponed)
         g_return_val_if_fail (postponed >= 0, FALSE);
 
         task->priv->postponed = postponed;
+        return TRUE;
+}
+
+/**
+ * rtm_task_get_created_date:
+ * @task: a #RtmTask.
+ *
+ * Gets the #RtmTask:created_date property of the object.
+ *
+ * Returns: the created date of the task.
+ */
+GTimeVal *
+rtm_task_get_created_date (RtmTask *task)
+{
+        g_return_val_if_fail (task != NULL, NULL);
+
+        return task->priv->created_date;
+}
+
+/**
+ * rtm_task_set_created_date:
+ * @task: a #RtmTask.
+ * @created_date: a created date for the #RtmTask.
+ *
+ * Sets the #RtmTask:created_date property of the object.
+ *
+ * Returns: %TRUE if created_date is set.
+ */
+gboolean
+rtm_task_set_created_date (RtmTask *task, GTimeVal *created_date)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+        g_return_val_if_fail (created_date != NULL, FALSE);
+
+        task->priv->created_date = rtm_util_g_time_val_dup (created_date);
+        return TRUE;
+}
+
+/**
+ * rtm_task_get_modified_date:
+ * @task: a #RtmTask.
+ *
+ * Gets the #RtmTask:modified_date property of the object.
+ *
+ * Returns: the modified date of the task.
+ */
+GTimeVal *
+rtm_task_get_modified_date (RtmTask *task)
+{
+        g_return_val_if_fail (task != NULL, NULL);
+
+        return task->priv->modified_date;
+}
+
+/**
+ * rtm_task_set_modified_date:
+ * @task: a #RtmTask.
+ * @modified_date: a modified date for the #RtmTask.
+ *
+ * Sets the #RtmTask:modified_date property of the object.
+ *
+ * Returns: %TRUE if modified_date is set.
+ */
+gboolean
+rtm_task_set_modified_date (RtmTask *task, GTimeVal *modified_date)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+        g_return_val_if_fail (modified_date != NULL, FALSE);
+
+        task->priv->modified_date = rtm_util_g_time_val_dup (modified_date);
+        return TRUE;
+}
+
+/**
+ * rtm_task_get_source:
+ * @task: a #RtmTask.
+ *
+ * Gets the #RtmTask:source property of the object.
+ *
+ * Returns: the source of the task.
+ */
+gchar *
+rtm_task_get_source (RtmTask *task)
+{
+        g_return_val_if_fail (task != NULL, NULL);
+
+        return task->priv->source;
+}
+
+/**
+ * rtm_task_set_source:
+ * @task: a #RtmTask.
+ * @source: a source for the #RtmTask.
+ *
+ * Sets the #RtmTask:source property of the object.
+ *
+ * Returns: %TRUE if source is set.
+ */
+gboolean
+rtm_task_set_source (RtmTask *task, gchar* source)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+        g_return_val_if_fail (source != NULL, FALSE);
+
+        task->priv->source = g_strdup (source);
+        return TRUE;
+}
+
+/**
+ * rtm_task_get_recurrence:
+ * @task: a #RtmTask.
+ *
+ * Gets the #RtmTask:recurrence property of the object.
+ *
+ * Returns: the recurrence of the task.
+ */
+gchar *
+rtm_task_get_recurrence (RtmTask *task)
+{
+        g_return_val_if_fail (task != NULL, NULL);
+
+        return task->priv->recurrence;
+}
+
+/**
+ * rtm_task_set_recurrence:
+ * @task: a #RtmTask.
+ * @recurrence: a recurrence for the #RtmTask.
+ *
+ * Sets the #RtmTask:recurrence property of the object.
+ *
+ * Returns: %TRUE if recurrence is set.
+ */
+gboolean
+rtm_task_set_recurrence (RtmTask *task, gchar* recurrence)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+        g_return_val_if_fail (recurrence != NULL, FALSE);
+
+        task->priv->recurrence = g_strdup (recurrence);
+        return TRUE;
+}
+
+/**
+ * rtm_task_recurrence_every:
+ * @task: a #RtmTask.
+ *
+ * Checks the #RtmTask:recurrence_every property of the object.
+ *
+ * Returns: %TRUE if the task recurrence is going to be reapeted always.
+ */
+gboolean
+rtm_task_is_recurrence_every (RtmTask *task)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+
+        return task->priv->recurrence_every;
+}
+
+/**
+ * rtm_task_set_recurrence_every:
+ * @task: a #RtmTask.
+ * @recurrence_every: %TRUE to specify that the task recurrence is going to be repeated always.
+ *
+ * Sets the #RtmTask:recurrence_every property of the object.
+ *
+ * Returns: %TRUE if recurrence_every is set.
+ */
+gboolean
+rtm_task_set_recurrence_every (RtmTask *task, gboolean recurrence_every)
+{
+        g_return_val_if_fail (task != NULL, FALSE);
+
+        task->priv->recurrence_every = recurrence_every;
         return TRUE;
 }

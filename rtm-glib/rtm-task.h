@@ -161,4 +161,34 @@ rtm_task_get_postponed (RtmTask *task);
 gboolean
 rtm_task_set_postponed (RtmTask *task, guint postponed);
 
+GTimeVal *
+rtm_task_get_created_date (RtmTask *task);
+
+gboolean
+rtm_task_set_created_date (RtmTask *task, GTimeVal *created_date);
+
+GTimeVal *
+rtm_task_get_modified_date (RtmTask *task);
+
+gboolean
+rtm_task_set_modified_date (RtmTask *task, GTimeVal *modified_date);
+
+gchar *
+rtm_task_get_source (RtmTask *task);
+
+gboolean
+rtm_task_set_source (RtmTask *task, gchar* source);
+
+gchar *
+rtm_task_get_recurrence (RtmTask *task);
+
+gboolean
+rtm_task_set_recurrence (RtmTask *task, gchar* recurrence);
+
+gboolean
+rtm_task_is_recurrence_every (RtmTask *task);
+
+gboolean
+rtm_task_set_recurrence_every (RtmTask *task, gboolean recurrence_every);
+
 #endif /* __RTM_TASK_H__ */
