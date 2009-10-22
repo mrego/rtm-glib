@@ -165,4 +165,8 @@ gchar *
 rtm_glib_tasks_uncomplete (RtmGlib *rtm, gchar* timeline, RtmTask *task,
                            GError **error);
 
+gchar *
+rtm_glib_tasks_move_priority (RtmGlib *rtm, gchar* timeline, RtmTask *task,
+                              gchar *direction, GError **error);
+
 #endif /* __RTM_GLIB_H__ */
