@@ -157,4 +157,8 @@ gchar *
 rtm_glib_tasks_set_priority (RtmGlib *rtm, gchar* timeline, RtmTask *task,
                              gchar *priority, GError **error);
 
+gchar *
+rtm_glib_tasks_complete (RtmGlib *rtm, gchar* timeline, RtmTask *task,
+                         GError **error);
+
 #endif /* __RTM_GLIB_H__ */

@@ -181,6 +181,16 @@ main (gint argc, gchar **argv)
                 g_print ("Task priority NOT set!\n");
         }
 
+        transaction_id = rtm_glib_tasks_complete (rtm, timeline, task, &error);
+        if (error != NULL) {
+                g_error ("%s", rtm_error_get_message (error));
+        }
+        if (transaction_id != NULL) {
+                g_print ("Task completed! transaction_id: %s\n", transaction_id);
+        } else {
+                g_print ("Task NOT completed!\n");
+        }
+
         glist = rtm_glib_locations_get_list (rtm, &error);
         if (error != NULL) {
                 g_error ("%s", rtm_error_get_message (error));
