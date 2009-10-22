@@ -181,4 +181,8 @@ gchar *
 rtm_glib_tasks_set_recurrence (RtmGlib *rtm, gchar* timeline, RtmTask *task,
                                gchar *repeat, GError **error);
 
+gchar *
+rtm_glib_tasks_set_estimate (RtmGlib *rtm, gchar* timeline, RtmTask *task,
+                             gchar *estimate, GError **error);
+
 #endif /* __RTM_GLIB_H__ */

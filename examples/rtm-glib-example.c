@@ -235,6 +235,16 @@ main (gint argc, gchar **argv)
                 g_print ("Task recurrence NOT set!\n");
         }
 
+        transaction_id = rtm_glib_tasks_set_estimate (rtm, timeline, task, "5 hours", &error);
+        if (error != NULL) {
+                g_error ("%s", rtm_error_get_message (error));
+        }
+        if (transaction_id != NULL) {
+                g_print ("Task estimate set! transaction_id: %s\n", transaction_id);
+        } else {
+                g_print ("Task estimate NOT set!\n");
+        }
+
         glist = rtm_glib_locations_get_list (rtm, &error);
         if (error != NULL) {
                 g_error ("%s", rtm_error_get_message (error));
