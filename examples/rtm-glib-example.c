@@ -254,7 +254,7 @@ main (gint argc, gchar **argv)
         } else {
                 g_print ("Task due date NOT set!\n");
         }
-return -1;
+
         glist = rtm_glib_locations_get_list (rtm, &error);
         if (error != NULL) {
                 g_error ("%s", rtm_error_get_message (error));
