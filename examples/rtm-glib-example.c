@@ -24,6 +24,7 @@
 #include <rtm-glib/rtm-error.h>
 #include <rtm-glib/rtm-list.h>
 #include <rtm-glib/rtm-location.h>
+#include <rtm-glib/rtm-time-zone.h>
 
 
 #define RTM_API_KEY "de4eacaea750baff02b70e6ec57fcf22"
@@ -47,6 +48,7 @@ main (gint argc, gchar **argv)
         gchar *transaction_id;
         RtmLocation *location;
         gchar *list_id_sent = NULL;
+        RtmTimeZone *time_zone;
 
         g_thread_init (NULL);
         g_type_init();
@@ -61,6 +63,16 @@ main (gint argc, gchar **argv)
         if (error != NULL) {
                 g_error ("%s", rtm_error_get_message (error));
         }
+
+        glist = rtm_glib_time_zones_get_list (rtm, &error);
+        if (error != NULL) {
+                g_error ("%s", rtm_error_get_message (error));
+        }
+        for (item = glist; item; item = g_list_next (item)) {
+                time_zone = (RtmTimeZone *) item->data;
+                g_print ("%s", rtm_time_zone_to_string (time_zone));
+        }
+        g_list_free (glist);
 
         frob = rtm_glib_auth_get_frob (rtm, &error);
         if (error != NULL) {

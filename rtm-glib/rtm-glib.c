@@ -32,6 +32,7 @@
 #include <rtm-glib.h>
 #include <rtm-error.h>
 #include <rtm-location.h>
+#include <rtm-time-zone.h>
 
 
 #define RTM_URL "http://api.rememberthemilk.com/services/rest/"
@@ -280,6 +281,9 @@
 /* @param (optional): parse=%s, Specifies whether to parse due as per
    rtm.time.parse. */
 #define RTM_METHOD_TASKS_SET_DUE_DATE "rtm.tasks.setDueDate"
+
+/* @param (required): api_key=%s, Your API application key */
+#define RTM_METHOD_TIME_ZONES_GET_LIST "rtm.timezones.getList"
 
 
 #define RTM_GLIB_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE (        \
@@ -2375,4 +2379,45 @@ rtm_glib_tasks_set_due_date (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         rest_xml_node_unref (root);
 
         return transaction_id;
+}
+
+/**
+ * rtm_glib_time_zones_get_list:
+ * @rtm: a #RtmGlib object.
+ * @error: location to store #GError or %NULL.
+ *
+ * Gets the list of time zones.
+ *
+ * Returns: A #GList of #RtmTimeZone objects.
+ **/
+GList *
+rtm_glib_time_zones_get_list (RtmGlib *rtm, GError **error)
+{
+        g_return_val_if_fail (rtm != NULL, NULL);
+
+        RestXmlNode *root, *node;
+        GList *list = NULL;
+        RtmTimeZone *time_zone;
+        GError *tmp_error = NULL;
+
+        g_debug ("rtm_glib_time_zones_get_list");
+
+        root = rtm_glib_call_method (
+                rtm,
+                RTM_METHOD_TIME_ZONES_GET_LIST, &tmp_error,
+                NULL);
+        if (tmp_error != NULL) {
+                g_propagate_error (error, tmp_error);
+                return NULL;
+        }
+
+        for (node = rest_xml_node_find (root, "timezone"); node; node = node->next) {
+                time_zone = rtm_time_zone_new ();
+                rtm_time_zone_load_data (time_zone, node);
+                list = g_list_append (list, time_zone);
+        }
+
+        rest_xml_node_unref (root);
+
+        return list;
 }
