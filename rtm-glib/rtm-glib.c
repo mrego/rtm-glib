@@ -1855,6 +1855,7 @@ GList *
 rtm_glib_locations_get_list (RtmGlib *rtm, GError **error)
 {
         g_return_val_if_fail (rtm != NULL, NULL);
+        g_return_val_if_fail (rtm->priv->auth_token != NULL, NULL);
 
         RestXmlNode *root, *node;
         GList *list = NULL;
