@@ -17,7 +17,9 @@ librtm_glib_la_SOURCES =	\
 	rtm-util.h		\
 	rtm-util.c		\
 	rtm-location.h		\
-	rtm-location.c
+	rtm-location.c		\
+	rtm-time-zone.h		\
+	rtm-time-zone.c
 
 librtm_glib_la_LDFLAGS =	\
 	$(RTM_GLIB_LIBS)
