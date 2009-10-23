@@ -46,7 +46,7 @@ main (gint argc, gchar **argv)
         gchar *timeline;
         gchar *transaction_id;
         RtmLocation *location;
-        gchar *list_id_sent;
+        gchar *list_id_sent = NULL;
 
         g_thread_init (NULL);
         g_type_init();
