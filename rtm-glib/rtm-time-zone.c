@@ -298,7 +298,7 @@ rtm_time_zone_set_name (RtmTimeZone *time_zone, gchar* name)
 gboolean
 rtm_time_zone_is_dst (RtmTimeZone *time_zone)
 {
-        g_return_val_if_fail (time_zone != NULL, NULL);
+        g_return_val_if_fail (time_zone != NULL, FALSE);
 
         return time_zone->priv->dst;
 }
