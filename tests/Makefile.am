@@ -1,13 +1,15 @@
 TESTS =				\
 	check-rtm-list		\
 	check-rtm-task		\
-	check-rtm-location
+	check-rtm-location	\
+	check-rtm-time-zone
 
 
 check_PROGRAMS =		\
 	check-rtm-list		\
 	check-rtm-task		\
-	check-rtm-location
+	check-rtm-location	\
+	check-rtm-time-zone
 
 
 check_rtm_list_SOURCES =	\
@@ -19,6 +21,8 @@ check_rtm_task_SOURCES =	\
 check_rtm_location_SOURCES =	\
 	check-rtm-location.c
 
+check_rtm_time_zone_SOURCES =	\
+	check-rtm-time-zone.c
 
 INCLUDES =			\
 	@CHECK_CFLAGS@		\
