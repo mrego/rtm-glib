@@ -311,14 +311,17 @@ main (gint argc, gchar **argv)
                 g_print ("Task tags NOT removed!\n");
         }
 
-        transaction_id = rtm_glib_tasks_move_to (rtm, timeline, task, list_id_sent, &error);
-        if (error != NULL) {
-                g_error ("%s", rtm_error_get_message (error));
-        }
-        if (transaction_id != NULL) {
-                g_print ("Task moved! transaction_id: %s\n", transaction_id);
-        } else {
-                g_print ("Task NOT moved!\n");
+        if (list_id_sent) {
+                transaction_id = rtm_glib_tasks_move_to (rtm, timeline, task, list_id_sent, &error);
+                if (error != NULL) {
+                        g_error ("%s", rtm_error_get_message (error));
+                }
+                if (transaction_id != NULL) {
+                        g_print ("Task moved! transaction_id: %s\n", transaction_id);
+                } else {
+                        g_print ("Task NOT moved!\n");
+                }
+                g_free (list_id_sent);
         }
 
         task = rtm_glib_tasks_add (rtm, timeline, "test-rtm-glib2", NULL, FALSE, &error);
@@ -405,7 +408,6 @@ main (gint argc, gchar **argv)
         g_free (username);
         g_free (timeline);
         g_free (transaction_id);
-        g_free (list_id_sent);
 
         g_object_unref (task);
         g_object_unref (rtm_list);
