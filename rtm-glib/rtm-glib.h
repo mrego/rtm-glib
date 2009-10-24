@@ -197,4 +197,8 @@ gchar *
 rtm_glib_time_parse (RtmGlib *rtm, gchar* text, gchar *timezone_id,
                      gboolean dateformat, GError **error);
 
+gchar *
+rtm_glib_time_convert (RtmGlib *rtm, gchar* to_timezone_id,
+                       gchar *from_timezone_id, gchar *time, GError **error);
+
 #endif /* __RTM_GLIB_H__ */

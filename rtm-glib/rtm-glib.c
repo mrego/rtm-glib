@@ -296,6 +296,13 @@
    1. */
 #define RTM_METHOD_TIME_PARSE "rtm.time.parse"
 
+/* @param (required): api_key=%s, Your API application key */
+/* @param (required): to_timezone=%s, Target timezone. */
+/* @param (optional): from_timezone=%s, Originating timezone. Defaults to UTC. */
+/* @param (optional): time=%s, Time to convert in ISO 8601 format. Defaults to
+   now. */
+#define RTM_METHOD_TIME_CONVERT "rtm.time.convert"
+
 
 #define RTM_GLIB_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE (        \
                                            (obj), RTM_TYPE_GLIB, RtmGlibPrivate))
@@ -2490,4 +2497,58 @@ rtm_glib_time_parse (RtmGlib *rtm, gchar* text, gchar *timezone_name,
         rest_xml_node_unref (root);
 
         return time;
+}
+
+/**
+ * rtm_glib_time_convert:
+ * @rtm: a #RtmGlib object.
+ * @to_timezone_name: target #RtmTimeZone name.
+ * @from_timezone_name: originating #RtmTimeZone name. Defaults to "UTC".
+ * @time: time to convert in ISO 8601 format. Defaults to "now".
+ * @error: location to store #GError or %NULL.
+ *
+ * Returns the specified time in the desired #RtmTimeZone.
+ *
+ * Returns: The time in ISO 8601 format.
+ **/
+gchar *
+rtm_glib_time_convert (RtmGlib *rtm, gchar* to_timezone_name,
+                       gchar *from_timezone_name, gchar *time, GError **error)
+{
+        g_return_val_if_fail (rtm != NULL, NULL);
+        g_return_val_if_fail (to_timezone_name != NULL, NULL);
+
+        RestXmlNode *root, *node;
+        GError *tmp_error = NULL;
+        gchar *result;
+
+        if (from_timezone_name == NULL) {
+                from_timezone_name = "UTC";
+        }
+
+        if (time == NULL) {
+                time = "now";
+        }
+
+        g_debug ("rtm_glib_time_convert");
+
+        root = rtm_glib_call_method (
+                rtm,
+                RTM_METHOD_TIME_CONVERT, &tmp_error,
+                "to_timezone", to_timezone_name,
+                "from_timezone", from_timezone_name,
+                "time", time,
+                NULL);
+        if (tmp_error != NULL) {
+                g_propagate_error (error, tmp_error);
+                return NULL;
+        }
+
+        node = rest_xml_node_find (root, "time");
+        result = g_strdup (node->content);
+        g_debug ("result: %s", result);
+
+        rest_xml_node_unref (root);
+
+        return result;
 }

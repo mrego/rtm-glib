@@ -75,7 +75,14 @@ main (gint argc, gchar **argv)
         }
         g_list_free (glist);
 
-        time = rtm_glib_time_parse (rtm, "2/10/2009", NULL, FALSE, &error);
+        time = rtm_glib_time_parse (rtm, "02/10/2009 10:25", NULL, FALSE, &error);
+        if (error != NULL) {
+                g_error ("%s", rtm_error_get_message (error));
+        }
+        g_print ("Time: %s\n", time);
+        g_free (time);
+
+        time = rtm_glib_time_convert (rtm, "Europe/Madrid", NULL, NULL, &error);
         if (error != NULL) {
                 g_error ("%s", rtm_error_get_message (error));
         }
