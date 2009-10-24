@@ -49,6 +49,7 @@ main (gint argc, gchar **argv)
         RtmLocation *location;
         gchar *list_id_sent = NULL;
         RtmTimeZone *time_zone;
+        gchar *time;
 
         g_thread_init (NULL);
         g_type_init();
@@ -73,6 +74,13 @@ main (gint argc, gchar **argv)
                 g_print ("%s", rtm_time_zone_to_string (time_zone));
         }
         g_list_free (glist);
+
+        time = rtm_glib_time_parse (rtm, "2/10/2009", NULL, FALSE, &error);
+        if (error != NULL) {
+                g_error ("%s", rtm_error_get_message (error));
+        }
+        g_print ("Time: %s\n", time);
+        g_free (time);
 
         frob = rtm_glib_auth_get_frob (rtm, &error);
         if (error != NULL) {

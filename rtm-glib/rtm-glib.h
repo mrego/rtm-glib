@@ -193,4 +193,8 @@ rtm_glib_tasks_set_due_date (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 GList *
 rtm_glib_time_zones_get_list (RtmGlib *rtm, GError **error);
 
+gchar *
+rtm_glib_time_parse (RtmGlib *rtm, gchar* text, gchar *timezone_id,
+                     gboolean dateformat, GError **error);
+
 #endif /* __RTM_GLIB_H__ */

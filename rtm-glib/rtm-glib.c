@@ -285,6 +285,17 @@
 /* @param (required): api_key=%s, Your API application key */
 #define RTM_METHOD_TIME_ZONES_GET_LIST "rtm.timezones.getList"
 
+/* @param (required): api_key=%s, Your API application key */
+/* @param (required): text=%s, Text to parse. */
+/* @param (optional): timezone=%s, If specified, text is parsed in the context
+   of timezone. A list of valid timezones can be retrieved with
+   rtm.timezones.getList. Defaults to UTC. */
+/* @param (optional): dateformat=%s, A value of 0 indicates an European date
+   format (14/02/2006). A value of 1 indicates an American date format
+   (02/14/2006). This value is used in case a date is ambiguous. Defaults to
+   1. */
+#define RTM_METHOD_TIME_PARSE "rtm.time.parse"
+
 
 #define RTM_GLIB_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE (        \
                                            (obj), RTM_TYPE_GLIB, RtmGlibPrivate))
@@ -2421,4 +2432,62 @@ rtm_glib_time_zones_get_list (RtmGlib *rtm, GError **error)
         rest_xml_node_unref (root);
 
         return list;
+}
+
+/**
+ * rtm_glib_time_parse:
+ * @rtm: a #RtmGlib object.
+ * @text: text to parse.
+ * @timezone_name: if specified, text is parsed in the context of #RtmTimeZone.
+ * @dateformat: %TRUE for American format (02/14/2009) and %FALSE for European
+ * format (14/02/2009). This value is used in case a date is ambiguous.
+ * @error: location to store #GError or %NULL.
+ *
+ * Returns the time, in UTC (or the #RtmTimeZone specified), for the parsed input.
+ *
+ * Returns: The time in ISO 8601 format.
+ **/
+gchar *
+rtm_glib_time_parse (RtmGlib *rtm, gchar* text, gchar *timezone_name,
+                     gboolean dateformat, GError **error)
+{
+        g_return_val_if_fail (rtm != NULL, NULL);
+        g_return_val_if_fail (text != NULL, NULL);
+
+        RestXmlNode *root, *node;
+        GError *tmp_error = NULL;
+        gchar *time;
+        gchar *dateformat_value;
+
+        if (timezone_name == NULL) {
+                timezone_name = "UTC";
+        }
+
+        if (dateformat) {
+                dateformat_value = "1";
+        } else {
+                dateformat_value = "0";
+        }
+
+        g_debug ("rtm_glib_time_parse");
+
+        root = rtm_glib_call_method (
+                rtm,
+                RTM_METHOD_TIME_PARSE, &tmp_error,
+                "text", text,
+                "timezone", timezone_name,
+                "dateformat", dateformat_value,
+                NULL);
+        if (tmp_error != NULL) {
+                g_propagate_error (error, tmp_error);
+                return NULL;
+        }
+
+        node = rest_xml_node_find (root, "time");
+        time = g_strdup (node->content);
+        g_debug ("time: %s", time);
+
+        rest_xml_node_unref (root);
+
+        return time;
 }
