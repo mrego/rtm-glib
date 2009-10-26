@@ -411,7 +411,7 @@ main (gint argc, gchar **argv)
                 g_print ("List NOT unarchived!\n");
         }
 
-        if (rtm_glib_lists_set_default (rtm, timeline, rtm_list, &error)) {
+        if (rtm_glib_lists_set_default_list (rtm, timeline, rtm_list, &error)) {
                 g_print ("List \"%s\" set as default!\n", rtm_list_get_id (rtm_list));
         } else {
                 g_print ("List \"%s\" NOT set as default!\n", rtm_list_get_id (rtm_list));

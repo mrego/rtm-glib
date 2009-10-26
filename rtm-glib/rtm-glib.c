@@ -1477,7 +1477,7 @@ rtm_glib_lists_set_name (RtmGlib *rtm, gchar* timeline, RtmList *list,
 }
 
 /**
- * rtm_glib_lists_set_default:
+ * rtm_glib_lists_set_default_list:
  * @rtm: a #RtmGlib object already authenticated.
  * @timeline: the timeline within which to run a method.
  * @list: the #RtmList to set as default list.
@@ -1488,8 +1488,8 @@ rtm_glib_lists_set_name (RtmGlib *rtm, gchar* timeline, RtmList *list,
  * Returns: %TRUE if the opration is successfuly.
  **/
 gboolean
-rtm_glib_lists_set_default (RtmGlib *rtm, gchar* timeline, RtmList *list,
-                            GError **error)
+rtm_glib_lists_set_default_list (RtmGlib *rtm, gchar* timeline, RtmList *list,
+                                 GError **error)
 {
         g_return_val_if_fail (rtm != NULL, FALSE);
         g_return_val_if_fail (rtm->priv->auth_token != NULL, FALSE);
@@ -1499,7 +1499,7 @@ rtm_glib_lists_set_default (RtmGlib *rtm, gchar* timeline, RtmList *list,
         RestXmlNode *root;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_lists_set_default");
+        g_debug ("rtm_glib_lists_set_default_list");
 
         root = rtm_glib_call_method (
                 rtm,
