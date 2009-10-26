@@ -898,6 +898,10 @@ rtm_glib_auth_get_login_url (RtmGlib *rtm, gchar *frob, gchar *perms)
 {
         g_return_val_if_fail (rtm != NULL, NULL);
         g_return_val_if_fail (frob != NULL, NULL);
+
+        if (perms == NULL) {
+                perms = "read";
+        }
         g_return_val_if_fail (
                 (g_strcmp0 (perms, "read") == 0) ||
                 (g_strcmp0 (perms, "write") == 0) ||
@@ -907,10 +911,6 @@ rtm_glib_auth_get_login_url (RtmGlib *rtm, gchar *frob, gchar *perms)
         gchar *url;
         GHashTable *params;
         gchar *md5;
-
-        if (perms == NULL) {
-                perms = "read";
-        }
 
         params = g_hash_table_new (g_str_hash, g_str_equal);
 
