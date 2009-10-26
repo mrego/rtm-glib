@@ -78,7 +78,7 @@ gboolean
 rtm_glib_auth_check_token (RtmGlib *rtm, gchar *auth_token, GError **error);
 
 gchar *
-rtm_glib_auth_get_login_url (RtmGlib *rtm, gchar *frob);
+rtm_glib_auth_get_login_url (RtmGlib *rtm, gchar *frob, gchar *perms);
 
 GList *
 rtm_glib_tasks_get_list (RtmGlib *rtm, gchar *list_id, gchar *filter,

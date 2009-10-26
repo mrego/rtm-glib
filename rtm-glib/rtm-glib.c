@@ -901,34 +901,45 @@ rtm_glib_auth_check_token (RtmGlib *rtm, gchar *auth_token, GError **error)
  * rtm_glib_auth_get_login_url:
  * @rtm: a #RtmGlib object.
  * @frob: the authentication frob.
+ * @perms: the requested permissions. Valid values are %read, %write or
+ * %delete. Default %read.
  *
  * Gets the URL to login in Remember The Milk.
  *
  * Returns: The URL to login.
  **/
 gchar *
-rtm_glib_auth_get_login_url (RtmGlib *rtm, gchar *frob)
+rtm_glib_auth_get_login_url (RtmGlib *rtm, gchar *frob, gchar *perms)
 {
         g_return_val_if_fail (rtm != NULL, NULL);
         g_return_val_if_fail (frob != NULL, NULL);
+        g_return_val_if_fail (
+                (g_strcmp0 (perms, "read") == 0) ||
+                (g_strcmp0 (perms, "write") == 0) ||
+                (g_strcmp0 (perms, "delete") == 0),
+                NULL);
 
         gchar *url;
         GHashTable *params;
         gchar *md5;
+
+        if (perms == NULL) {
+                perms = "read";
+        }
 
         g_debug ("rtm_glib_auth_get_login_url");
 
         params = g_hash_table_new (g_str_hash, g_str_equal);
 
         g_hash_table_insert (params, "api_key", rtm->priv->api_key);
-        g_hash_table_insert (params, "perms", "delete");
+        g_hash_table_insert (params, "perms", perms);
         g_hash_table_insert (params, "frob", frob);
 
         md5 = rtm_glib_caculate_md5 (rtm, params);
 
         url = g_strconcat (RTM_URL_AUTH, "?",
                            "api_key=", rtm->priv->api_key, "&",
-                           "perms=", "delete", "&",
+                           "perms=", perms, "&",
                            "frob=", frob, "&",
                            "api_sig=", md5,
                            NULL);

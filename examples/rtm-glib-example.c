@@ -95,7 +95,7 @@ main (gint argc, gchar **argv)
         }
         g_print ("Frob: %s\n", frob);
 
-        url = rtm_glib_auth_get_login_url (rtm, frob);
+        url = rtm_glib_auth_get_login_url (rtm, frob, "delete");
         g_print ("URL: %s\n", url);
 
         getchar ();
