@@ -33,6 +33,7 @@
 #include <rtm-error.h>
 #include <rtm-location.h>
 #include <rtm-time-zone.h>
+#include <rtm-util.h>
 
 
 #define RTM_URL "http://api.rememberthemilk.com/services/rest/"
@@ -500,8 +501,6 @@ rtm_glib_caculate_md5 (RtmGlib *rtm, GHashTable * params)
         gchar *params_string;
         gchar *md5;
 
-        g_debug ("rtm_calculate_md5");
-
         /* First concat the SHARED SECRET key */
         params_string = rtm->priv->shared_secret;
 
@@ -520,14 +519,12 @@ rtm_glib_caculate_md5 (RtmGlib *rtm, GHashTable * params)
                 keys = keys->next;
         }
 
-        g_debug ("params_string: %s", params_string);
+        DEBUG_PRINT ("params_string: %s", params_string);
 
         /* Generates the md5 value */
         md5 = g_compute_checksum_for_string (G_CHECKSUM_MD5,
                                              params_string,
                                              strlen (params_string));
-
-        g_debug ("md5: %s", md5);
 
         g_free (params_string);
 
@@ -550,8 +547,6 @@ rtm_glib_sign_call (RtmGlib *rtm, RestProxyCall **call)
 
         GHashTable *params;
         gchar *md5;
-
-        g_debug ("rtm_sign_call");
 
         /* Gets the call params */
         params = rest_proxy_call_get_params (*call);
@@ -638,7 +633,7 @@ rtm_glib_call_method (RtmGlib *rtm, gchar *method, GError **error, ...)
         va_list params;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_call_method: %s", method);
+        DEBUG_PRINT ("rtm_call_method: %s", method);
 
         proxy = rest_proxy_new (RTM_URL, FALSE);
         call = rest_proxy_new_call (proxy);
@@ -665,7 +660,7 @@ rtm_glib_call_method (RtmGlib *rtm, gchar *method, GError **error, ...)
 
                 return NULL;
         }
-        g_debug ("payload: %s", rest_proxy_call_get_payload (call));
+        DEBUG_PRINT ("payload: %s", rest_proxy_call_get_payload (call));
 
         parser = rest_xml_parser_new ();
         root = rest_xml_parser_parse_from_data (
@@ -704,8 +699,6 @@ rtm_glib_test_echo (RtmGlib *rtm, GError **error)
         gboolean valid = FALSE;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_test_echo");
-
         root = rtm_glib_call_method (rtm,
                 RTM_METHOD_TEST_ECHO, &tmp_error,
                 NULL);
@@ -718,7 +711,7 @@ rtm_glib_test_echo (RtmGlib *rtm, GError **error)
         valid = (g_strcmp0 (node->content, rtm->priv->api_key) == 0);
 
         node = rest_xml_node_find (root, "method");
-        g_debug ("method: %s", node->content);
+        DEBUG_PRINT ("method: %s", node->content);
 
         rest_xml_node_unref (root);
 
@@ -746,8 +739,6 @@ rtm_glib_test_login (RtmGlib *rtm, gchar *auth_token, GError **error)
         gchar *username;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_test_login");
-
         root = rtm_glib_call_method (rtm,
                 RTM_METHOD_TEST_LOGIN, &tmp_error,
                 "auth_token", auth_token,
@@ -758,11 +749,11 @@ rtm_glib_test_login (RtmGlib *rtm, gchar *auth_token, GError **error)
         }
 
         node = rest_xml_node_find (root, "user");
-        g_debug ("user_id: %s", rest_xml_node_get_attr (node, "id"));
+        DEBUG_PRINT ("user_id: %s", rest_xml_node_get_attr (node, "id"));
 
         node = rest_xml_node_find (root, "username");
         username = g_strdup (node->content);
-        g_debug ("username: %s", username);
+        DEBUG_PRINT ("username: %s", username);
 
         rest_xml_node_unref (root);
 
@@ -789,8 +780,6 @@ rtm_glib_auth_get_frob (RtmGlib *rtm, GError **error)
         gchar *frob;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_auth_get_frob");
-
         root = rtm_glib_call_method (rtm,
                 RTM_METHOD_AUTH_GET_FROB, &tmp_error,
                 NULL);
@@ -802,7 +791,7 @@ rtm_glib_auth_get_frob (RtmGlib *rtm, GError **error)
         node = rest_xml_node_find (root, "frob");
 
         frob = g_strdup (node->content);
-        g_debug ("frob: %s", frob);
+        DEBUG_PRINT ("frob: %s", frob);
 
         rest_xml_node_unref (root);
 
@@ -829,8 +818,6 @@ rtm_glib_auth_get_token (RtmGlib *rtm, gchar *frob, GError **error)
         gchar *auth_token;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_auth_get_token");
-
         root = rtm_glib_call_method (rtm,
                 RTM_METHOD_AUTH_GET_TOKEN, &tmp_error,
                 "frob", frob,
@@ -843,7 +830,7 @@ rtm_glib_auth_get_token (RtmGlib *rtm, gchar *frob, GError **error)
         node = rest_xml_node_find (root, "token");
 
         auth_token = g_strdup (node->content);
-        g_debug ("auth_token: %s", auth_token);
+        DEBUG_PRINT ("auth_token: %s", auth_token);
 
         rest_xml_node_unref (root);
 
@@ -872,8 +859,6 @@ rtm_glib_auth_check_token (RtmGlib *rtm, gchar *auth_token, GError **error)
         RestXmlNode *root, *node;
         gboolean valid = FALSE;
         GError *tmp_error = NULL;
-
-        g_debug ("rtm_glib_auth_check_token");
 
         root = rtm_glib_call_method (rtm,
                 RTM_METHOD_AUTH_CHECK_TOKEN, &tmp_error,
@@ -927,8 +912,6 @@ rtm_glib_auth_get_login_url (RtmGlib *rtm, gchar *frob, gchar *perms)
                 perms = "read";
         }
 
-        g_debug ("rtm_glib_auth_get_login_url");
-
         params = g_hash_table_new (g_str_hash, g_str_equal);
 
         g_hash_table_insert (params, "api_key", rtm->priv->api_key);
@@ -944,7 +927,7 @@ rtm_glib_auth_get_login_url (RtmGlib *rtm, gchar *frob, gchar *perms)
                            "api_sig=", md5,
                            NULL);
 
-        g_debug ("url: %s", url);
+        DEBUG_PRINT ("url: %s", url);
 
         g_hash_table_unref (params);
         g_free (md5);
@@ -986,8 +969,6 @@ rtm_glib_tasks_get_list (RtmGlib *rtm, gchar *list_id, gchar *filter,
         RtmTask *task;
         const gchar *task_list_id;
         GError *tmp_error = NULL;
-
-        g_debug ("rtm_glib_tasks_get_list");
 
         if (list_id == NULL) {
                 root = rtm_glib_call_method (
@@ -1046,8 +1027,6 @@ rtm_glib_lists_get_list (RtmGlib *rtm, GError **error)
         RtmList *rtmlist;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_lists_get_list");
-
         root = rtm_glib_call_method (rtm,
                 RTM_METHOD_LISTS_GET_LIST, &tmp_error,
                 "auth_token", rtm->priv->auth_token,
@@ -1087,8 +1066,6 @@ rtm_glib_timelines_create (RtmGlib *rtm, GError **error)
         gchar *timeline;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_timelines_create");
-
         root = rtm_glib_call_method (rtm,
                 RTM_METHOD_TIMELINES_CREATE, &tmp_error,
                 "auth_token", rtm->priv->auth_token,
@@ -1100,7 +1077,7 @@ rtm_glib_timelines_create (RtmGlib *rtm, GError **error)
 
         node = rest_xml_node_find (root, "timeline");
         timeline = g_strdup (node->content);
-        g_debug ("timeline: %s", timeline);
+        DEBUG_PRINT ("timeline: %s", timeline);
 
         rest_xml_node_unref (root);
 
@@ -1135,8 +1112,6 @@ rtm_glib_tasks_add (RtmGlib *rtm, gchar* timeline, gchar *task_name,
         RtmTask *task;
         GError *tmp_error = NULL;
         gchar *parse_smart_add = "0";
-
-        g_debug ("rtm_glib_tasks_add");
 
         if (parse) {
                 parse_smart_add = "1";
@@ -1202,8 +1177,6 @@ rtm_glib_transactions_undo (RtmGlib *rtm, gchar *timeline,
         RestXmlNode *root;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_transactions_undo");
-
         root = rtm_glib_call_method (rtm,
                 RTM_METHOD_TRANSACTIONS_UNDO, &tmp_error,
                 "auth_token", rtm->priv->auth_token,
@@ -1244,8 +1217,6 @@ rtm_glib_tasks_delete (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_tasks_delete");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TASKS_DELETE, &tmp_error,
@@ -1262,7 +1233,7 @@ rtm_glib_tasks_delete (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -1295,8 +1266,6 @@ rtm_glib_tasks_set_name (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_tasks_set_name");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TASKS_SET_NAME, &tmp_error,
@@ -1314,7 +1283,7 @@ rtm_glib_tasks_set_name (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -1349,8 +1318,6 @@ rtm_glib_lists_add (RtmGlib *rtm, gchar* timeline, gchar *list_name,
         if (filter == NULL) {
                 filter = "";
         }
-
-        g_debug ("rtm_glib_lists_add");
 
         root = rtm_glib_call_method (
                 rtm,
@@ -1399,8 +1366,6 @@ rtm_glib_lists_delete (RtmGlib *rtm, gchar* timeline, RtmList *list,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_lists_delete");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_LISTS_DELETE, &tmp_error,
@@ -1415,7 +1380,7 @@ rtm_glib_lists_delete (RtmGlib *rtm, gchar* timeline, RtmList *list,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -1452,8 +1417,6 @@ rtm_glib_lists_set_name (RtmGlib *rtm, gchar* timeline, RtmList *list,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_lists_set_name");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_LISTS_SET_NAME, &tmp_error,
@@ -1469,7 +1432,7 @@ rtm_glib_lists_set_name (RtmGlib *rtm, gchar* timeline, RtmList *list,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -1498,8 +1461,6 @@ rtm_glib_lists_set_default_list (RtmGlib *rtm, gchar* timeline, RtmList *list,
 
         RestXmlNode *root;
         GError *tmp_error = NULL;
-
-        g_debug ("rtm_glib_lists_set_default_list");
 
         root = rtm_glib_call_method (
                 rtm,
@@ -1542,8 +1503,6 @@ rtm_glib_lists_archive (RtmGlib *rtm, gchar* timeline, RtmList *list,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_lists_archive");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_LISTS_ARCHIVE, &tmp_error,
@@ -1558,7 +1517,7 @@ rtm_glib_lists_archive (RtmGlib *rtm, gchar* timeline, RtmList *list,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -1589,8 +1548,6 @@ rtm_glib_lists_unarchive (RtmGlib *rtm, gchar* timeline, RtmList *list,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_lists_unarchive");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_LISTS_UNARCHIVE, &tmp_error,
@@ -1605,7 +1562,7 @@ rtm_glib_lists_unarchive (RtmGlib *rtm, gchar* timeline, RtmList *list,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -1642,8 +1599,6 @@ rtm_glib_tasks_set_url (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_tasks_set_url");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TASKS_SET_URL, &tmp_error,
@@ -1661,7 +1616,7 @@ rtm_glib_tasks_set_url (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -1697,8 +1652,6 @@ rtm_glib_tasks_set_tags (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_tasks_set_tags");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TASKS_SET_TAGS, &tmp_error,
@@ -1716,7 +1669,7 @@ rtm_glib_tasks_set_tags (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -1748,8 +1701,6 @@ rtm_glib_tasks_add_tags (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_tasks_add_tags");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TASKS_ADD_TAGS, &tmp_error,
@@ -1767,7 +1718,7 @@ rtm_glib_tasks_add_tags (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -1799,8 +1750,6 @@ rtm_glib_tasks_remove_tags (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_tasks_remove_tags");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TASKS_REMOVE_TAGS, &tmp_error,
@@ -1818,7 +1767,7 @@ rtm_glib_tasks_remove_tags (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -1851,8 +1800,6 @@ rtm_glib_tasks_set_location (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_tasks_set_location");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TASKS_SET_LOCATION, &tmp_error,
@@ -1870,7 +1817,7 @@ rtm_glib_tasks_set_location (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -1896,8 +1843,6 @@ rtm_glib_locations_get_list (RtmGlib *rtm, GError **error)
         GList *list = NULL;
         RtmLocation *location;
         GError *tmp_error = NULL;
-
-        g_debug ("rtm_glib_locations_get_list");
 
         root = rtm_glib_call_method (
                 rtm,
@@ -1951,8 +1896,6 @@ rtm_glib_tasks_set_priority (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_tasks_set_priority");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TASKS_SET_PRIORITY, &tmp_error,
@@ -1970,7 +1913,7 @@ rtm_glib_tasks_set_priority (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -2001,8 +1944,6 @@ rtm_glib_tasks_complete (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_tasks_complete");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TASKS_COMPLETE, &tmp_error,
@@ -2019,7 +1960,7 @@ rtm_glib_tasks_complete (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -2050,8 +1991,6 @@ rtm_glib_tasks_uncomplete (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_tasks_uncomplete");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TASKS_UNCOMPLETE, &tmp_error,
@@ -2068,7 +2007,7 @@ rtm_glib_tasks_uncomplete (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -2101,8 +2040,6 @@ rtm_glib_tasks_move_priority (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_tasks_move_priority");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TASKS_MOVE_PRIORITY, &tmp_error,
@@ -2120,7 +2057,7 @@ rtm_glib_tasks_move_priority (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -2152,8 +2089,6 @@ rtm_glib_tasks_postpone (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_tasks_postpone");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TASKS_POSTPONE, &tmp_error,
@@ -2170,7 +2105,7 @@ rtm_glib_tasks_postpone (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -2203,8 +2138,6 @@ rtm_glib_tasks_move_to (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_tasks_move_to");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TASKS_MOVE_TO, &tmp_error,
@@ -2222,7 +2155,7 @@ rtm_glib_tasks_move_to (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -2260,8 +2193,6 @@ rtm_glib_tasks_set_recurrence (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_tasks_set_recurrence");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TASKS_SET_RECURRENCE, &tmp_error,
@@ -2279,7 +2210,7 @@ rtm_glib_tasks_set_recurrence (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -2316,8 +2247,6 @@ rtm_glib_tasks_set_estimate (RtmGlib *rtm, gchar* timeline, RtmTask *task,
         gchar *transaction_id;
         GError *tmp_error = NULL;
 
-        g_debug ("rtm_glib_tasks_set_estimate");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TASKS_SET_ESTIMATE, &tmp_error,
@@ -2335,7 +2264,7 @@ rtm_glib_tasks_set_estimate (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -2389,8 +2318,6 @@ rtm_glib_tasks_set_due_date (RtmGlib *rtm, gchar* timeline, RtmTask *task,
                 parse_value = "0";
         }
 
-        g_debug ("rtm_glib_tasks_set_due_date");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TASKS_SET_DUE_DATE, &tmp_error,
@@ -2410,7 +2337,7 @@ rtm_glib_tasks_set_due_date (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
         node = rest_xml_node_find (root, "transaction");
         transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
-        g_debug ("transaction_id: %s", transaction_id);
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
 
         rest_xml_node_unref (root);
 
@@ -2435,8 +2362,6 @@ rtm_glib_time_zones_get_list (RtmGlib *rtm, GError **error)
         GList *list = NULL;
         RtmTimeZone *time_zone;
         GError *tmp_error = NULL;
-
-        g_debug ("rtm_glib_time_zones_get_list");
 
         root = rtm_glib_call_method (
                 rtm,
@@ -2493,8 +2418,6 @@ rtm_glib_time_parse (RtmGlib *rtm, gchar* text, gchar *timezone_name,
                 dateformat_value = "0";
         }
 
-        g_debug ("rtm_glib_time_parse");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TIME_PARSE, &tmp_error,
@@ -2509,7 +2432,7 @@ rtm_glib_time_parse (RtmGlib *rtm, gchar* text, gchar *timezone_name,
 
         node = rest_xml_node_find (root, "time");
         time = g_strdup (node->content);
-        g_debug ("time: %s", time);
+        DEBUG_PRINT ("time: %s", time);
 
         rest_xml_node_unref (root);
 
@@ -2547,8 +2470,6 @@ rtm_glib_time_convert (RtmGlib *rtm, gchar* to_timezone_name,
                 time = "now";
         }
 
-        g_debug ("rtm_glib_time_convert");
-
         root = rtm_glib_call_method (
                 rtm,
                 RTM_METHOD_TIME_CONVERT, &tmp_error,
@@ -2563,7 +2484,7 @@ rtm_glib_time_convert (RtmGlib *rtm, gchar* to_timezone_name,
 
         node = rest_xml_node_find (root, "time");
         result = g_strdup (node->content);
-        g_debug ("result: %s", result);
+        DEBUG_PRINT ("result: %s", result);
 
         rest_xml_node_unref (root);
 

@@ -20,6 +20,10 @@
 
 #include <glib.h>
 
+
+#define DEBUG_PRINT(format, ...) g_debug ("%s (%s) " format, G_STRLOC, G_STRFUNC, ##__VA_ARGS__)
+
+
 gchar *
 rtm_util_string_or_null (gchar *string);
 
