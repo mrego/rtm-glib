@@ -108,7 +108,7 @@ rtm_glib_tasks_set_name (RtmGlib *rtm, gchar* timeline, RtmTask *task,
 
 RtmList *
 rtm_glib_lists_add (RtmGlib *rtm, gchar* timeline, gchar *list_name,
-                    GError **error);
+                    gchar *filter, GError **error);
 
 gchar *
 rtm_glib_lists_delete (RtmGlib *rtm, gchar* timeline, RtmList *list,

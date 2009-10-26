@@ -1326,6 +1326,7 @@ rtm_glib_tasks_set_name (RtmGlib *rtm, gchar* timeline, RtmTask *task,
  * @rtm: a #RtmGlib object already authenticated.
  * @timeline: the timeline within which to run a method.
  * @list_name: the desired list name.
+ * @filter: if specified, a smart list is created with the desired criteria.
  * @error: location to store #GError or %NULL.
  *
  * Adds a new list.
@@ -1334,7 +1335,7 @@ rtm_glib_tasks_set_name (RtmGlib *rtm, gchar* timeline, RtmTask *task,
  **/
 RtmList *
 rtm_glib_lists_add (RtmGlib *rtm, gchar* timeline, gchar *list_name,
-                    GError **error)
+                    gchar *filter, GError **error)
 {
         g_return_val_if_fail (rtm != NULL, NULL);
         g_return_val_if_fail (rtm->priv->auth_token != NULL, NULL);
@@ -1345,6 +1346,10 @@ rtm_glib_lists_add (RtmGlib *rtm, gchar* timeline, gchar *list_name,
         RtmList *list;
         GError *tmp_error = NULL;
 
+        if (filter == NULL) {
+                filter = "";
+        }
+
         g_debug ("rtm_glib_lists_add");
 
         root = rtm_glib_call_method (
@@ -1353,6 +1358,7 @@ rtm_glib_lists_add (RtmGlib *rtm, gchar* timeline, gchar *list_name,
                 "auth_token", rtm->priv->auth_token,
                 "timeline", timeline,
                 "name", list_name,
+                "filter", filter,
                 NULL);
         if (tmp_error != NULL) {
                 g_propagate_error (error, tmp_error);

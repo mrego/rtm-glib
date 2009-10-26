@@ -371,7 +371,7 @@ main (gint argc, gchar **argv)
                 g_print ("Task NOT deleted!\n");
         }
 
-        rtm_list = rtm_glib_lists_add (rtm, timeline, "test-list-glib", &error);
+        rtm_list = rtm_glib_lists_add (rtm, timeline, "test-list-glib", NULL, &error);
         if (error != NULL) {
                 g_error ("%s", rtm_error_get_message (error));
         }
