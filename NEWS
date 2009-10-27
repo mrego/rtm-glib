@@ -1,0 +1,76 @@
+Version 0.1.0 (27 Oct 2009)
+===========================
+
+This is the first release of *RTM-GLib*. It provides the basic functionalities
+to interact with Rememeber The Milk API [1]_.
+
+The project is in an early stage, so lot of changes could come in future
+releases.
+
+The methods implemented in this version are:
+
+* auth
+
+  * rtm.auth.checkToken
+  * rtm.auth.getFrob
+  * rtm.auth.getToken
+
+* lists
+
+  * rtm.lists.add
+  * rtm.lists.archive
+  * rtm.lists.delete
+  * rtm.lists.getList
+  * rtm.lists.setDefaultList
+  * rtm.lists.setName
+  * rtm.lists.unarchive
+
+* locations
+
+  * rtm.locations.getList
+
+* tasks
+
+  * rtm.tasks.add
+  * rtm.tasks.addTags
+  * rtm.tasks.complete
+  * rtm.tasks.delete
+  * rtm.tasks.getList
+  * rtm.tasks.movePriority
+  * rtm.tasks.moveTo
+  * rtm.tasks.postpone
+  * rtm.tasks.removeTags
+  * rtm.tasks.setDueDate
+  * rtm.tasks.setEstimate
+  * rtm.tasks.setLocation
+  * rtm.tasks.setName
+  * rtm.tasks.setPriority
+  * rtm.tasks.setRecurrence
+  * rtm.tasks.setTags
+  * rtm.tasks.setURL
+  * rtm.tasks.uncomplete
+
+* test
+
+  * rtm.test.echo
+  * rtm.test.login
+
+* time
+
+  * rtm.time.convert
+  * rtm.time.parse
+
+* timelines
+
+  * rtm.timelines.create
+
+* timezones
+
+  * rtm.timezones.getList
+
+* transactions
+
+  * rtm.transactions.undo
+
+
+.. [1] http://www.rememberthemilk.com/services/api/
