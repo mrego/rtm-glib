@@ -13,7 +13,7 @@ Remember The Milk [1]_ is a task and time management web application.
 Requirements
 ------------
 
-*RTM-GLib* depens on:
+*RTM-GLib* depends on:
 
 * GLib (``glib-2.0``)
 * librest (``rest``) [2]_
