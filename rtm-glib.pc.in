@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: rtm-glib
+Description: library which provides access to the API of Remember The Milk
+Version: @VERSION@
+Libs: -L${libdir} -lrtm-glib
+Cflags: -I${includedir}/rtm-glib
+Requires: glib-2.0 rest

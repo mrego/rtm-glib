@@ -67,6 +67,7 @@ examples/Makefile
 doc/Makefile
 doc/reference/Makefile
 doc/reference/version.xml
+rtm-glib.pc
 ])
 
 AC_OUTPUT
