@@ -23,3 +23,13 @@ librtm_glib_la_SOURCES =	\
 
 librtm_glib_la_LDFLAGS =	\
 	$(RTM_GLIB_LIBS)
+
+hdir = $(includedir)/rtm-glib
+h_DATA =			\
+	rtm-glib.h		\
+	rtm-list.h		\
+	rtm-task.h		\
+	rtm-error.h		\
+	rtm-util.h		\
+	rtm-location.h		\
+	rtm-time-zone.h
