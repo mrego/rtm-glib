@@ -2,14 +2,16 @@ TESTS =				\
 	check-rtm-list		\
 	check-rtm-task		\
 	check-rtm-location	\
-	check-rtm-time-zone
+	check-rtm-time-zone	\
+	check-rtm-contact
 
 
 check_PROGRAMS =		\
 	check-rtm-list		\
 	check-rtm-task		\
 	check-rtm-location	\
-	check-rtm-time-zone
+	check-rtm-time-zone	\
+	check-rtm-contact
 
 
 check_rtm_list_SOURCES =	\
