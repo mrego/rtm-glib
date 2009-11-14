@@ -25,6 +25,7 @@
 #include <rest/rest-xml-parser.h>
 #include <rtm-glib/rtm-task.h>
 #include <rtm-glib/rtm-list.h>
+#include <rtm-glib/rtm-contact.h>
 
 
 G_BEGIN_DECLS
@@ -200,5 +201,16 @@ rtm_glib_time_parse (RtmGlib *rtm, gchar* text, gchar *timezone_id,
 gchar *
 rtm_glib_time_convert (RtmGlib *rtm, gchar* to_timezone_id,
                        gchar *from_timezone_id, gchar *time, GError **error);
+
+GList *
+rtm_glib_contacts_get_list (RtmGlib *rtm, GError **error);
+
+RtmContact *
+rtm_glib_contacts_add (RtmGlib *rtm, gchar* timeline, gchar *contact,
+                       GError **error);
+
+gchar *
+rtm_glib_contacts_delete (RtmGlib *rtm, gchar* timeline, RtmContact *contact,
+                          GError **error);
 
 #endif /* __RTM_GLIB_H__ */

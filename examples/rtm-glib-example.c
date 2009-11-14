@@ -25,6 +25,7 @@
 #include <rtm-glib/rtm-list.h>
 #include <rtm-glib/rtm-location.h>
 #include <rtm-glib/rtm-time-zone.h>
+#include <rtm-glib/rtm-contact.h>
 
 
 #define RTM_API_KEY "de4eacaea750baff02b70e6ec57fcf22"
@@ -50,6 +51,7 @@ main (gint argc, gchar **argv)
         gchar *list_id_sent = NULL;
         RtmTimeZone *time_zone;
         gchar *time;
+        RtmContact *contact;
 
         g_thread_init (NULL);
         g_type_init();
@@ -430,6 +432,36 @@ main (gint argc, gchar **argv)
                 g_print ("List NOT deleted!\n");
         }
 
+        glist = rtm_glib_contacts_get_list (rtm, &error);
+        if (error != NULL) {
+                g_error ("%s", rtm_error_get_message (error));
+        }
+        for (item = glist; item; item = g_list_next (item)) {
+                contact = (RtmContact *) item->data;
+                g_print ("%s", rtm_contact_to_string (contact));
+        }
+        g_list_free (glist);
+
+        contact = rtm_glib_contacts_add (rtm, timeline, "rtmglib", &error);
+        if (error != NULL) {
+                g_error ("%s", rtm_error_get_message (error));
+        }
+        if (task != NULL) {
+                g_print ("Contact added! contact_id: %s\n", rtm_contact_get_id (contact));
+        } else {
+                g_print ("Contact NOT added!\n");
+        }
+
+        transaction_id = rtm_glib_contacts_delete (rtm, timeline, contact, &error);
+        if (error != NULL) {
+                g_error ("%s", rtm_error_get_message (error));
+        }
+        if (transaction_id != NULL) {
+                g_print ("Contact deleted! transaction_id: %s\n", transaction_id);
+        } else {
+                g_print ("Contact NOT deleted!\n");
+        }
+
         g_free (frob);
         g_free (url);
         g_free (username);
@@ -438,6 +470,7 @@ main (gint argc, gchar **argv)
 
         g_object_unref (task);
         g_object_unref (rtm_list);
+        g_object_unref (contact);
         g_object_unref (rtm);
 
         return 0;

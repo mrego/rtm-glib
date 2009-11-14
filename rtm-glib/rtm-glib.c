@@ -304,6 +304,20 @@
    now. */
 #define RTM_METHOD_TIME_CONVERT "rtm.time.convert"
 
+/* @param (required): api_key=%s, Your API application key */
+#define RTM_METHOD_CONTACTS_GET_LIST "rtm.contacts.getList"
+
+/* @param (required): api_key=%s, Your API application key */
+/* @param (required): timeline=%s, The timeline within which to run a method */
+/* @param (required): contact=%s, The contact to add. Can be a username or an
+   email address of a registered Remember The Milk user */
+#define RTM_METHOD_CONTACTS_ADD "rtm.contacts.add"
+
+/* @param (required): api_key=%s, Your API application key */
+/* @param (required): timeline=%s, The timeline within which to run a method */
+/* @param (required): contact_id=%s, The id of the contact to perform an action on */
+#define RTM_METHOD_CONTACTS_DELETE "rtm.contacts.delete"
+
 
 #define RTM_GLIB_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE (        \
                                            (obj), RTM_TYPE_GLIB, RtmGlibPrivate))
@@ -2489,4 +2503,135 @@ rtm_glib_time_convert (RtmGlib *rtm, gchar* to_timezone_name,
         rest_xml_node_unref (root);
 
         return result;
+}
+
+/**
+ * rtm_glib_contacts_get_contact:
+ * @rtm: a #RtmGlib object already authenticated.
+ * @error: location to store #GError or %NULL.
+ *
+ * Gets the list of contacts.
+ *
+ * Returns: A #GList of #RtmContact objects.
+ **/
+GList *
+rtm_glib_contacts_get_list (RtmGlib *rtm, GError **error)
+{
+        g_return_val_if_fail (rtm != NULL, NULL);
+        g_return_val_if_fail (rtm->priv->auth_token != NULL, NULL);
+
+        RestXmlNode *root, *node;
+        GList *glist = NULL;
+        RtmContact *contact;
+        GError *tmp_error = NULL;
+
+        root = rtm_glib_call_method (rtm,
+                RTM_METHOD_CONTACTS_GET_LIST, &tmp_error,
+                "auth_token", rtm->priv->auth_token,
+                NULL);
+        if (tmp_error != NULL) {
+                g_propagate_error (error, tmp_error);
+                return NULL;
+        }
+
+        for (node = rest_xml_node_find (root, "contact"); node; node = node->next) {
+                contact = rtm_contact_new ();
+                rtm_contact_load_data (contact, node);
+                glist = g_list_append (glist, contact);
+        }
+
+        rest_xml_node_unref (root);
+
+        return glist;
+}
+
+/**
+ * rtm_glib_contacts_add:
+ * @rtm: a #RtmGlib object already authenticated.
+ * @timeline: the timeline within which to run a method.
+ * @contact: The contact to add. Can be a username or an email address of a
+ * registered Remember The Milk user.
+ * @error: location to store #GError or %NULL.
+ *
+ * Adds a new contact.
+ *
+ * Returns: A #RtmContact with the data of the new contact added.
+ **/
+RtmContact *
+rtm_glib_contacts_add (RtmGlib *rtm, gchar* timeline, gchar *contact,
+                       GError **error)
+{
+        g_return_val_if_fail (rtm != NULL, NULL);
+        g_return_val_if_fail (rtm->priv->auth_token != NULL, NULL);
+        g_return_val_if_fail (contact != NULL, NULL);
+
+        RestXmlNode *root, *node;
+        RtmContact *rtmcontact;
+        GError *tmp_error = NULL;
+
+        root = rtm_glib_call_method (
+                rtm,
+                RTM_METHOD_CONTACTS_ADD, &tmp_error,
+                "auth_token", rtm->priv->auth_token,
+                "timeline", timeline,
+                "contact", contact,
+                NULL);
+        if (tmp_error != NULL) {
+                g_propagate_error (error, tmp_error);
+                return NULL;
+        }
+
+        node = rest_xml_node_find (root, "contact");
+
+        rtmcontact = rtm_contact_new ();
+        rtm_contact_load_data (rtmcontact, node);
+
+        rest_xml_node_unref (root);
+
+        return rtmcontact;
+}
+
+/**
+ * rtm_glib_contacts_delete:
+ * @rtm: a #RtmGlib object already authenticated.
+ * @timeline: the timeline within which to run a method.
+ * @contact: a #RtmContact to be deleted.
+ * @error: location to store #GError or %NULL.
+ *
+ * Removes a contact.
+ *
+ * Returns: The transaction identifier or %NULL if it fails.
+ **/
+gchar *
+rtm_glib_contacts_delete (RtmGlib *rtm, gchar* timeline, RtmContact *contact,
+                          GError **error)
+{
+        g_return_val_if_fail (rtm != NULL, NULL);
+        g_return_val_if_fail (rtm->priv->auth_token != NULL, NULL);
+        g_return_val_if_fail (timeline != NULL, NULL);
+        g_return_val_if_fail (contact != NULL, NULL);
+
+        RestXmlNode *root, *node;
+        gchar *transaction_id;
+        GError *tmp_error = NULL;
+
+        root = rtm_glib_call_method (
+                rtm,
+                RTM_METHOD_CONTACTS_DELETE, &tmp_error,
+                "auth_token", rtm->priv->auth_token,
+                "timeline", timeline,
+                "contact_id", rtm_contact_get_id (contact),
+                NULL);
+        if (tmp_error != NULL) {
+                g_propagate_error (error, tmp_error);
+                return NULL;
+        }
+
+        node = rest_xml_node_find (root, "transaction");
+        transaction_id = g_strdup (rest_xml_node_get_attr (node, "id"));
+        DEBUG_PRINT ("transaction_id: %s", transaction_id);
+
+        rest_xml_node_unref (root);
+
+        return transaction_id;
 }
