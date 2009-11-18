@@ -1,0 +1,22 @@
+TODO
+====
+
+* Pending API methods:
+
+  * groups
+
+    * rtm.groups.add
+    * rtm.groups.addContact
+    * rtm.groups.delete
+    * rtm.groups.getList
+    * rtm.groups.removeContact
+
+  * tasks.notes
+
+    * rtm.tasks.notes.add
+    * rtm.tasks.notes.delete
+    * rtm.tasks.notes.edit
+
+* GObject introspection support (http://live.gnome.org/GObjectIntrospection).
+
+* Asynchronous calls support.
