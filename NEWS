@@ -1,3 +1,26 @@
+Version 0.1.1 (19 Nov 2009)
+===========================
+
+Maintenance release just to fix some issues in order to use the library from
+external applications.
+
+Summary of changes:
+
+* Created .pc file and configured library headers.
+
+* Automatize ChangeLog generation.
+
+* Implemented new API methos:
+
+  * contacts
+
+    * rtm.contacts.add
+    * rtm.contacts.delete
+    * rtm.contacts.getList
+
+* Added TODO file.
+
+
 Version 0.1.0 (27 Oct 2009)
 ===========================
 
